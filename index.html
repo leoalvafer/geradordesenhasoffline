@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PG — Gerador de Senhas Seguras</title>
-  <meta name="description" content="Aplicação PWA standalone para geração de senhas seguras com criptografia nativa (CSPRNG), temas customizáveis e operação 100% offline.">
+  <meta name="description" content="Aplicação PWA standalone para geração de senhas e frases-passe (Diceware) com criptografia nativa (CSPRNG), temas customizáveis e operação 100% offline.">
   
   <!-- Configurações PWA e Metadados -->
   <link rel="manifest" href="manifest.json">
@@ -24,9 +24,7 @@
           resolvedTheme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
         }
         document.documentElement.setAttribute('data-theme', resolvedTheme);
-      } catch (e) {
-        // Fallback gracioso caso storage esteja restrito
-      }
+      } catch (e) {}
     })();
   </script>
 
@@ -136,13 +134,13 @@
     /* Container Principal */
     .app-container {
       width: 100%;
-      max-width: 580px;
+      max-width: 600px;
       display: flex;
       flex-direction: column;
       gap: 1.25rem;
     }
 
-    /* Barra Superior: Versão, Botão de Testes e Seletor de Tema */
+    /* Barra Superior: Versão, Ações e Tema */
     .top-bar {
       display: flex;
       justify-content: space-between;
@@ -156,6 +154,7 @@
       display: flex;
       align-items: center;
       gap: 0.5rem;
+      flex-wrap: wrap;
     }
 
     .brand-badge {
@@ -184,8 +183,8 @@
       height: 14px;
     }
 
-    /* Botão Abrir Painel de Testes (RT-05 / RT-06 / RT-07) */
-    .btn-tests-badge {
+    /* Botão Painel de Testes */
+    .btn-badge-action {
       display: inline-flex;
       align-items: center;
       gap: 0.35rem;
@@ -201,21 +200,32 @@
       outline: none;
     }
 
-    .btn-tests-badge:hover {
+    .btn-badge-action:hover {
       background: rgba(16, 185, 129, 0.25);
       border-color: #34d399;
       transform: translateY(-1px);
     }
 
-    .btn-tests-badge:focus-visible {
+    .btn-badge-action:focus-visible {
       outline: 2px solid var(--strength-strong);
       outline-offset: 2px;
     }
 
-    [data-theme="light"] .btn-tests-badge {
+    [data-theme="light"] .btn-badge-action {
       background: rgba(16, 185, 129, 0.12);
       color: #059669;
       border-color: rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-badge-help {
+      background: rgba(59, 130, 246, 0.12);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      color: #60a5fa;
+    }
+
+    .btn-badge-help:hover {
+      background: rgba(59, 130, 246, 0.22);
+      border-color: #60a5fa;
     }
 
     /* Seletor de Tema (RF-11) */
@@ -283,10 +293,58 @@
     .subtitle {
       font-size: 0.875rem;
       color: var(--text-secondary);
-      max-width: 460px;
+      max-width: 480px;
     }
 
-    /* Cards */
+    /* Seletor de Modo de Geração (RF-13) */
+    .mode-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: var(--card-subtle);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-md);
+      padding: 4px;
+      gap: 4px;
+    }
+
+    .mode-tab-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      padding: 0.6rem 0.75rem;
+      border-radius: var(--radius-sm);
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      outline: none;
+    }
+
+    .mode-tab-btn:hover {
+      color: var(--text-main);
+    }
+
+    .mode-tab-btn.active {
+      background: var(--primary);
+      color: #ffffff;
+      box-shadow: var(--shadow-button);
+    }
+
+    .mode-tab-btn:focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
+    }
+
+    .mode-tab-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* Card Principal */
     .card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
@@ -477,26 +535,26 @@
       align-items: center;
     }
 
-    /* Comprimento (RF-01) */
-    .length-section {
+    /* Slider & Número */
+    .config-range-row {
       display: flex;
       flex-direction: column;
       gap: 0.75rem;
     }
 
-    .length-header {
+    .config-range-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
 
-    .length-label {
+    .config-range-label {
       font-size: 0.875rem;
       font-weight: 500;
       color: var(--text-main);
     }
 
-    .length-input-number {
+    .config-number-input {
       width: 64px;
       height: 36px;
       background: var(--card-subtle);
@@ -511,17 +569,17 @@
       transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
 
-    .length-input-number:focus {
+    .config-number-input:focus {
       border-color: var(--card-border-focus);
       box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
     }
 
-    .length-input-number::-webkit-outer-spin-button,
-    .length-input-number::-webkit-inner-spin-button {
+    .config-number-input::-webkit-outer-spin-button,
+    .config-number-input::-webkit-inner-spin-button {
       -webkit-appearance: none;
       margin: 0;
     }
-    .length-input-number[type=number] {
+    .config-number-input[type=number] {
       -moz-appearance: textfield;
       appearance: textfield;
     }
@@ -592,7 +650,7 @@
       font-family: var(--font-mono);
     }
 
-    /* Conjuntos de Caracteres (RF-02) */
+    /* Conjuntos de Caracteres */
     .charsets-grid {
       display: grid;
       grid-template-columns: 1fr;
@@ -654,7 +712,7 @@
       font-family: var(--font-mono);
     }
 
-    /* Filtro Ambíguos (RF-03) */
+    /* Filtro Ambíguos */
     .filter-section {
       border-top: 1px solid var(--card-border);
       padding-top: 1rem;
@@ -707,6 +765,64 @@
     .filter-desc {
       font-size: 0.75rem;
       color: var(--text-muted);
+    }
+
+    /* Controles do Modo Frase-Passe (RF-13) */
+    .passphrase-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .separator-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.5rem;
+    }
+
+    @media (min-width: 480px) {
+      .separator-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .separator-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 0.6rem 0.5rem;
+      background: var(--card-subtle);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      font-size: 0.8125rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      outline: none;
+    }
+
+    .separator-btn:hover {
+      border-color: rgba(59, 130, 246, 0.5);
+      color: var(--text-main);
+    }
+
+    .separator-btn.active {
+      border-color: var(--primary);
+      background: rgba(59, 130, 246, 0.15);
+      color: #60a5fa;
+      font-weight: 600;
+    }
+
+    .separator-btn:focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
+    }
+
+    .separator-glyph {
+      font-family: var(--font-mono);
+      font-size: 1.125rem;
+      font-weight: 700;
     }
 
     /* Botão Primário de Geração (RF-07) */
@@ -920,6 +1036,45 @@
       color: var(--text-muted);
     }
 
+    /* Barra de Preferências / Perfis (RF-14) */
+    .profile-bar {
+      display: flex;
+      justify-content: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-profile-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.4rem 0.8rem;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-sm);
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-profile-action:hover {
+      color: var(--text-main);
+      border-color: var(--primary);
+      background: var(--card-subtle);
+    }
+
+    .btn-profile-action:focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
+    }
+
+    .btn-profile-action svg {
+      width: 14px;
+      height: 14px;
+    }
+
     /* Legenda Acessível de Atalhos de Teclado (RF-10) */
     .shortcuts-legend {
       display: flex;
@@ -929,7 +1084,7 @@
       gap: 0.75rem 1.25rem;
       font-size: 0.75rem;
       color: var(--text-secondary);
-      padding: 0.5rem 0;
+      padding: 0.25rem 0;
     }
 
     .shortcut-pill {
@@ -976,26 +1131,26 @@
       height: 14px;
     }
 
-    /* Modal / Diálogo de Testes Unitários e Qualidade (RT-05, RT-06, RT-07) */
-    .tests-dialog {
+    /* Diálogos Modais (RT-05 / RT-09) */
+    .custom-dialog {
       border: 1px solid var(--dialog-border);
       border-radius: var(--radius-lg);
       background: var(--dialog-bg);
       color: var(--text-main);
       padding: 0;
-      max-width: 600px;
+      max-width: 620px;
       width: 92%;
       margin: auto;
       box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
       outline: none;
     }
 
-    .tests-dialog::backdrop {
+    .custom-dialog::backdrop {
       background: var(--dialog-backdrop);
       backdrop-filter: blur(4px);
     }
 
-    .tests-dialog-header {
+    .dialog-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -1003,7 +1158,7 @@
       border-bottom: 1px solid var(--dialog-border);
     }
 
-    .tests-dialog-title {
+    .dialog-title {
       font-size: 1.125rem;
       font-weight: 700;
       display: flex;
@@ -1011,6 +1166,35 @@
       gap: 0.5rem;
     }
 
+    .dialog-body {
+      max-height: 60vh;
+      overflow-y: auto;
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      font-size: 0.875rem;
+      line-height: 1.6;
+    }
+
+    .dialog-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      border-top: 1px solid var(--dialog-border);
+    }
+
+    .dialog-section-title {
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 0.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    /* Listas de Testes no Modal */
     .tests-summary-bar {
       display: flex;
       justify-content: space-between;
@@ -1091,14 +1275,6 @@
       font-size: 0.75rem;
       color: var(--text-muted);
       margin-top: 0.15rem;
-    }
-
-    .tests-dialog-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1rem 1.5rem;
-      border-top: 1px solid var(--dialog-border);
     }
 
     .btn-secondary {
@@ -1191,19 +1367,24 @@
 
   <main class="app-container">
     
-    <!-- Barra Superior: Versão, Painel de Testes e Alternância de Temas -->
+    <!-- Barra Superior: Versão, Atalhos Rápidos e Tema -->
     <div class="top-bar">
       <div class="top-left-actions">
         <div class="brand-badge">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
           </svg>
-          <span>v0.3.0 • Standalone</span>
+          <span>v1.0.0 • Final</span>
         </div>
 
         <!-- Botão Abrir Painel de Testes Standalone (RT-05 / RT-06 / RT-07) -->
-        <button type="button" id="btn-open-tests" class="btn-tests-badge" aria-label="Abrir suíte de testes unitários e qualidade" title="Executar testes unitários e de qualidade no navegador">
-          <span>🧪 Testes Standalone</span>
+        <button type="button" id="btn-open-tests" class="btn-badge-action" aria-label="Abrir suíte de testes unitários e qualidade" title="Executar testes unitários e de qualidade no navegador">
+          <span>🧪 Testes</span>
+        </button>
+
+        <!-- Botão Manual / Ajuda (RT-09) -->
+        <button type="button" id="btn-open-guide" class="btn-badge-action btn-badge-help" aria-label="Abrir guia de uso e atalhos" title="Manual e documentação">
+          <span>📖 Guia</span>
         </button>
       </div>
 
@@ -1240,21 +1421,40 @@
     <!-- Cabeçalho -->
     <header class="header">
       <h1 class="title">Gerador de Senhas Seguras</h1>
-      <p class="subtitle">Geração instantânea e confidencial no seu navegador via CSPRNG nativo. Suíte de testes automatizados integrada.</p>
+      <p class="subtitle">Geração de senhas aleatórias e frases-passe (Diceware) com criptografia nativa CSPRNG. 100% offline e confidencial.</p>
     </header>
 
+    <!-- Seletor de Modo de Geração (RF-13) -->
+    <div class="mode-tabs" role="tablist" aria-label="Modo de geração de credencial">
+      <button type="button" id="tab-mode-password" class="mode-tab-btn active" role="tab" aria-selected="true" aria-controls="panel-password">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+        <span>Senha Aleatória</span>
+      </button>
+      <button type="button" id="tab-mode-passphrase" class="mode-tab-btn" role="tab" aria-selected="false" aria-controls="panel-passphrase">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/>
+          <path d="M6 6h10"/>
+          <path d="M6 10h10"/>
+        </svg>
+        <span>Frase-passe (Diceware)</span>
+      </button>
+    </div>
+
     <!-- Card Principal -->
-    <section class="card" aria-label="Painel de Geração de Senhas">
+    <section class="card" aria-label="Painel de Geração de Credenciais">
       
       <!-- Visor de Senha -->
       <div class="visor-container">
         <div id="password-display" class="password-text" aria-live="polite" aria-atomic="true" title="Clique para selecionar">
-          <!-- Senha gerada inserida via JavaScript -->
+          <!-- Credencial gerada inserida via JavaScript -->
         </div>
 
         <div class="visor-actions">
           <!-- Alternar Visibilidade (RF-09 / RF-10) -->
-          <button type="button" id="btn-visibility" class="btn-icon" aria-label="Ocultar ou exibir senha" title="Alternar visibilidade (Tecla V)">
+          <button type="button" id="btn-visibility" class="btn-icon" aria-label="Ocultar ou exibir credencial" title="Alternar visibilidade (Tecla V)">
             <svg id="icon-eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
               <circle cx="12" cy="12" r="3"/>
@@ -1268,7 +1468,7 @@
           </button>
 
           <!-- Regenerar Rápido (RF-07 / RF-10) -->
-          <button type="button" id="btn-regenerate-quick" class="btn-icon" aria-label="Gerar nova senha" title="Gerar nova senha (Tecla Espaço)">
+          <button type="button" id="btn-regenerate-quick" class="btn-icon" aria-label="Gerar nova credencial" title="Gerar nova credencial (Tecla Espaço)">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
               <path d="M3 3v5h5"/>
@@ -1278,7 +1478,7 @@
           </button>
 
           <!-- Copiar (RF-06 / RF-10) -->
-          <button type="button" id="btn-copy" class="btn-icon btn-copy-highlight" aria-label="Copiar senha em texto claro" title="Copiar para área de transferência (Tecla C ou Ctrl+C)">
+          <button type="button" id="btn-copy" class="btn-icon btn-copy-highlight" aria-label="Copiar credencial em texto claro" title="Copiar para área de transferência (Tecla C ou Ctrl+C)">
             <svg id="icon-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
               <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
@@ -1291,7 +1491,7 @@
       </div>
 
       <!-- Indicador de Força & Entropia (RF-08) -->
-      <div class="strength-wrapper" aria-label="Indicador de robustez da senha">
+      <div class="strength-wrapper" aria-label="Indicador de robustez da credencial">
         <div class="strength-header">
           <span class="strength-title">Força estimada</span>
           <div class="strength-meta">
@@ -1304,84 +1504,164 @@
         </div>
       </div>
 
-      <!-- Configuração de Comprimento (RF-01) -->
-      <div class="length-section">
-        <div class="length-header">
-          <label for="length-slider" class="length-label">Comprimento da Senha</label>
-          <input type="number" id="length-number" class="length-input-number" min="4" max="64" value="16" aria-label="Comprimento numérico (de 4 a 64)">
-        </div>
-        <div class="slider-container">
-          <input type="range" id="length-slider" class="range-slider" min="4" max="64" value="16" aria-label="Controle deslizante de comprimento da senha">
-          <div class="slider-bounds">
-            <span>4</span>
-            <span>64</span>
+      <!-- PAINEL 1: Controles de Senha Aleatória -->
+      <div id="panel-password" class="mode-panel">
+        
+        <!-- Configuração de Comprimento (RF-01) -->
+        <div class="config-range-row">
+          <div class="config-range-header">
+            <label for="length-slider" class="config-range-label">Comprimento da Senha</label>
+            <input type="number" id="length-number" class="config-number-input" min="4" max="64" value="16" aria-label="Comprimento numérico (de 4 a 64)">
+          </div>
+          <div class="slider-container">
+            <input type="range" id="length-slider" class="range-slider" min="4" max="64" value="16" aria-label="Controle deslizante de comprimento da senha">
+            <div class="slider-bounds">
+              <span>4</span>
+              <span>64</span>
+            </div>
           </div>
         </div>
+
+        <!-- Conjuntos de Caracteres (RF-02) -->
+        <fieldset style="border: none; padding: 0; margin: 1rem 0 0 0; display: flex; flex-direction: column; gap: 0.625rem;">
+          <legend class="section-title">Conjuntos de Caracteres</legend>
+          <div class="charsets-grid">
+            
+            <label class="option-card" for="cb-uppercase">
+              <input type="checkbox" id="cb-uppercase" checked>
+              <div class="option-info">
+                <span class="option-title">Maiúsculas</span>
+                <span class="option-sample">A-Z</span>
+              </div>
+            </label>
+
+            <label class="option-card" for="cb-lowercase">
+              <input type="checkbox" id="cb-lowercase" checked>
+              <div class="option-info">
+                <span class="option-title">Minúsculas</span>
+                <span class="option-sample">a-z</span>
+              </div>
+            </label>
+
+            <label class="option-card" for="cb-numbers">
+              <input type="checkbox" id="cb-numbers" checked>
+              <div class="option-info">
+                <span class="option-title">Números</span>
+                <span class="option-sample">0-9</span>
+              </div>
+            </label>
+
+            <label class="option-card" for="cb-symbols">
+              <input type="checkbox" id="cb-symbols" checked>
+              <div class="option-info">
+                <span class="option-title">Símbolos</span>
+                <span class="option-sample">!@#$%^&*...</span>
+              </div>
+            </label>
+
+          </div>
+        </fieldset>
+
+        <!-- Filtro de Caracteres Ambíguos (RF-03) -->
+        <div class="filter-section" style="margin-top: 1rem;">
+          <label class="filter-card" for="cb-ambiguous">
+            <input type="checkbox" id="cb-ambiguous">
+            <div class="filter-info">
+              <span class="filter-title">Excluir caracteres semelhantes/ambíguos</span>
+              <span class="filter-desc">Remove caracteres de fácil confusão visual: <code>0</code>, <code>O</code>, <code>o</code>, <code>1</code>, <code>l</code>, <code>I</code>, <code>|</code></span>
+            </div>
+          </label>
+        </div>
+
       </div>
 
-      <!-- Conjuntos de Caracteres (RF-02) -->
-      <fieldset style="border: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.625rem;">
-        <legend class="section-title">Conjuntos de Caracteres</legend>
-        <div class="charsets-grid">
-          
-          <label class="option-card" for="cb-uppercase">
-            <input type="checkbox" id="cb-uppercase" checked>
-            <div class="option-info">
-              <span class="option-title">Maiúsculas</span>
-              <span class="option-sample">A-Z</span>
+      <!-- PAINEL 2: Controles de Frase-passe Diceware (RF-13) -->
+      <div id="panel-passphrase" class="mode-panel passphrase-controls" style="display: none;">
+        
+        <!-- Quantidade de Palavras -->
+        <div class="config-range-row">
+          <div class="config-range-header">
+            <label for="words-slider" class="config-range-label">Quantidade de Palavras</label>
+            <input type="number" id="words-number" class="config-number-input" min="3" max="8" value="4" aria-label="Quantidade de palavras na frase-passe (de 3 a 8)">
+          </div>
+          <div class="slider-container">
+            <input type="range" id="words-slider" class="range-slider" min="3" max="8" value="4" aria-label="Controle deslizante de quantidade de palavras">
+            <div class="slider-bounds">
+              <span>3 palavras</span>
+              <span>8 palavras</span>
             </div>
-          </label>
-
-          <label class="option-card" for="cb-lowercase">
-            <input type="checkbox" id="cb-lowercase" checked>
-            <div class="option-info">
-              <span class="option-title">Minúsculas</span>
-              <span class="option-sample">a-z</span>
-            </div>
-          </label>
-
-          <label class="option-card" for="cb-numbers">
-            <input type="checkbox" id="cb-numbers" checked>
-            <div class="option-info">
-              <span class="option-title">Números</span>
-              <span class="option-sample">0-9</span>
-            </div>
-          </label>
-
-          <label class="option-card" for="cb-symbols">
-            <input type="checkbox" id="cb-symbols" checked>
-            <div class="option-info">
-              <span class="option-title">Símbolos</span>
-              <span class="option-sample">!@#$%^&*...</span>
-            </div>
-          </label>
-
+          </div>
         </div>
-      </fieldset>
 
-      <!-- Filtro de Caracteres Ambíguos (RF-03) -->
-      <div class="filter-section">
-        <label class="filter-card" for="cb-ambiguous">
-          <input type="checkbox" id="cb-ambiguous">
+        <!-- Escolha do Separador -->
+        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+          <span class="section-title">Separador entre Palavras</span>
+          <div class="separator-grid" role="radiogroup" aria-label="Separador de palavras">
+            <button type="button" class="separator-btn active" data-sep="-" role="radio" aria-checked="true" aria-label="Hífen">
+              <span class="separator-glyph">-</span>
+              <span>Hífen</span>
+            </button>
+            <button type="button" class="separator-btn" data-sep=" " role="radio" aria-checked="false" aria-label="Espaço">
+              <span class="separator-glyph">␣</span>
+              <span>Espaço</span>
+            </button>
+            <button type="button" class="separator-btn" data-sep="." role="radio" aria-checked="false" aria-label="Ponto">
+              <span class="separator-glyph">.</span>
+              <span>Ponto</span>
+            </button>
+            <button type="button" class="separator-btn" data-sep="random-digit" role="radio" aria-checked="false" aria-label="Dígito aleatório">
+              <span class="separator-glyph">0-9</span>
+              <span>Dígito</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Opção de Capitalização das Palavras -->
+        <label class="filter-card" for="cb-capitalize">
+          <input type="checkbox" id="cb-capitalize">
           <div class="filter-info">
-            <span class="filter-title">Excluir caracteres semelhantes/ambíguos</span>
-            <span class="filter-desc">Remove caracteres de fácil confusão visual: <code>0</code>, <code>O</code>, <code>o</code>, <code>1</code>, <code>l</code>, <code>I</code>, <code>|</code></span>
+            <span class="filter-title">Capitalizar primeira letra de cada palavra</span>
+            <span class="filter-desc">Facilita a leitura e memorização da frase-passe (ex.: <code>Abacate-Abelha-Castelo</code>)</span>
           </div>
         </label>
+
       </div>
 
-      <!-- Botão Primário de Geração (RF-07) -->
-      <button type="button" id="btn-generate-main" class="btn-generate-main" aria-label="Gerar nova senha com os parâmetros selecionados">
+      <!-- Botão Primário de Geração -->
+      <button type="button" id="btn-generate-main" class="btn-generate-main" aria-label="Gerar nova credencial com os parâmetros selecionados">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
           <path d="M3 3v5h5"/>
           <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/>
           <path d="M16 21h5v-5"/>
         </svg>
-        <span>Gerar Nova Senha</span>
+        <span id="btn-generate-text">Gerar Nova Senha</span>
       </button>
 
     </section>
+
+    <!-- Barra de Exportação e Importação de Configurações (RF-14) -->
+    <div class="profile-bar">
+      <button type="button" id="btn-export-config" class="btn-profile-action" aria-label="Exportar parâmetros de configuração em arquivo JSON">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        <span>Exportar Configurações</span>
+      </button>
+
+      <button type="button" id="btn-import-config" class="btn-profile-action" aria-label="Importar parâmetros de configuração de arquivo JSON">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+        <span>Importar Configurações</span>
+      </button>
+
+      <input type="file" id="input-import-file" style="display: none;" accept=".json,application/json" aria-label="Selecionar arquivo de configuração JSON">
+    </div>
 
     <!-- Histórico Efêmero em Memória de Sessão (RF-12) -->
     <details class="history-card" id="history-details">
@@ -1412,17 +1692,17 @@
           </button>
         </div>
 
-        <ul id="history-list" class="history-list" aria-label="Lista de senhas recentes da sessão">
-          <li class="history-empty">Nenhuma senha anterior gerada nesta sessão.</li>
+        <ul id="history-list" class="history-list" aria-label="Lista de credenciais recentes da sessão">
+          <li class="history-empty">Nenhuma credencial anterior gerada nesta sessão.</li>
         </ul>
       </div>
     </details>
 
-    <!-- Legenda Acessível de Atalhos de Teclado (RF-10) -->
+    <!-- Legenda Acessível de Atalhos de Teclado (RF-10 / RT-09) -->
     <section class="shortcuts-legend" aria-label="Atalhos de teclado para produtividade">
       <div class="shortcut-pill">
         <kbd>Espaço</kbd>
-        <span>Nova Senha</span>
+        <span>Nova Credencial</span>
       </div>
       <div class="shortcut-pill">
         <kbd>C</kbd> ou <kbd>Ctrl+C</kbd>
@@ -1431,6 +1711,14 @@
       <div class="shortcut-pill">
         <kbd>V</kbd>
         <span>Ocultar/Exibir</span>
+      </div>
+      <div class="shortcut-pill">
+        <kbd>?</kbd>
+        <span>Manual</span>
+      </div>
+      <div class="shortcut-pill">
+        <kbd>T</kbd>
+        <span>Testes</span>
       </div>
     </section>
 
@@ -1449,9 +1737,9 @@
   </main>
 
   <!-- Painel Modal de Testes Automatizados Standalone (RT-05, RT-06, RT-07) -->
-  <dialog id="tests-modal" class="tests-dialog" aria-labelledby="tests-dialog-title" aria-modal="true">
-    <div class="tests-dialog-header">
-      <h2 id="tests-dialog-title" class="tests-dialog-title">
+  <dialog id="tests-modal" class="custom-dialog" aria-labelledby="tests-dialog-title" aria-modal="true">
+    <div class="dialog-header">
+      <h2 id="tests-dialog-title" class="dialog-title">
         <span>🧪 Testes Automatizados Standalone</span>
       </h2>
       <button type="button" id="btn-close-tests" class="btn-icon" aria-label="Fechar painel de testes" title="Fechar">
@@ -1466,7 +1754,7 @@
       <span>Execução no navegador (RT-05 / RT-06 / RT-07)</span>
       <div style="display: flex; align-items: center; gap: 0.75rem;">
         <span id="tests-execution-time" style="color: var(--text-muted); font-family: var(--font-mono);">0ms</span>
-        <span id="tests-badge-status" class="tests-badge-status">7/7 Aprovados</span>
+        <span id="tests-badge-status" class="tests-badge-status">9/9 Aprovados</span>
       </div>
     </div>
 
@@ -1474,7 +1762,7 @@
       <!-- Resultados dos testes inseridos dinamicamente -->
     </ul>
 
-    <div class="tests-dialog-footer">
+    <div class="dialog-footer">
       <button type="button" id="btn-rerun-tests" class="btn-primary-small">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
@@ -1485,6 +1773,59 @@
         <span>Executar Testes Novamente</span>
       </button>
       <button type="button" id="btn-dismiss-tests" class="btn-secondary">Fechar</button>
+    </div>
+  </dialog>
+
+  <!-- Modal de Guia de Uso e Documentação (RT-09) -->
+  <dialog id="guide-modal" class="custom-dialog" aria-labelledby="guide-dialog-title" aria-modal="true">
+    <div class="dialog-header">
+      <h2 id="guide-dialog-title" class="dialog-title">
+        <span>📖 Manual do Usuário & Documentação (v1.0.0)</span>
+      </h2>
+      <button type="button" id="btn-close-guide" class="btn-icon" aria-label="Fechar guia de uso" title="Fechar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="dialog-body">
+      <div>
+        <h3 class="dialog-section-title">🔒 Segurança Criptográfica Nativa (CSPRNG)</h3>
+        <p>O PG utiliza exclusivamente a Web Cryptography API nativa (<code>window.crypto.getRandomValues</code>) com amostragem por rejeição para eliminação de viés (modulo bias). O sistema opera em isolamento de rede absoluto (Zero Network) e nenhuma credencial é gravada em storage persistente.</p>
+      </div>
+
+      <div>
+        <h3 class="dialog-section-title">🔑 Modos de Geração</h3>
+        <p><strong>Senha Aleatória:</strong> Ideal para contas principais, bancos e gerenciadores. Permite configurar comprimento (4 a 64) e filtros de maiúsculas, minúsculas, números, símbolos e remoção de caracteres visualmente semelhantes.</p>
+        <p style="margin-top: 0.35rem;"><strong>Frase-passe (Diceware):</strong> Ideal para memorização humana fácil e desbloqueio manual. Concatena de 3 a 8 palavras sorteadas de um dicionário curado em português de 512 termos.</p>
+      </div>
+
+      <div>
+        <h3 class="dialog-section-title">📊 Escala de Entropia (Shannon / Bit-Strength)</h3>
+        <p>• <strong>Fraca (&lt; 50 bits):</strong> Vulnerável a ataques de força bruta rápidos.<br>
+           • <strong>Média (50 a 74 bits):</strong> Adequada para acessos corriqueiros e uso diário.<br>
+           • <strong>Forte (75 a 99 bits):</strong> Excelente proteção contra ataques avançados.<br>
+           • <strong>Muito Forte (≥ 100 bits):</strong> Impossível de quebrar computacionalmente no estado da arte atual.</p>
+      </div>
+
+      <div>
+        <h3 class="dialog-section-title">⚡ Atalhos de Teclado</h3>
+        <p>• <kbd>Espaço</kbd>: Gerar nova credencial.<br>
+           • <kbd>C</kbd> ou <kbd>Ctrl+C</kbd>: Copiar credencial atual em texto claro.<br>
+           • <kbd>V</kbd>: Alternar visibilidade da credencial no visor.</p>
+      </div>
+
+      <div>
+        <h3 class="dialog-section-title">📱 Instalação como Web App (PWA)</h3>
+        <p>No Chrome ou Edge desktop, clique no ícone de instalação na barra de endereços. No Safari (iOS), use o menu de compartilhamento e selecione "Adicionar à Tela de Início". No Android, clique em "Instalar Aplicativo".</p>
+      </div>
+    </div>
+
+    <div class="dialog-footer">
+      <span>Versão homologada v1.0.0</span>
+      <button type="button" id="btn-dismiss-guide" class="btn-secondary">Entendido</button>
     </div>
   </dialog>
 
@@ -1513,6 +1854,9 @@
     /* Caracteres Ambíguos para Exclusão (RF-03) */
     const AMBIGUOUS_SET = new Set(['0', 'O', 'o', '1', 'l', 'I', '|']);
 
+    /* Dicionário Compacto Diceware em Português (512 palavras selecionadas = 9 bits/palavra) (RF-13) */
+    const DICEWARE_DICTIONARY = ["abacate","abacaxi","abelha","abrigo","abril","acaso","aceno","acerto","acesso","adega","adepto","adesivo","adubo","adulto","afeto","afonso","agosto","agudo","aguia","agulha","ajuda","ajuste","alarme","aldeia","alegre","alegria","alemao","alerta","alface","algema","algodao","alheio","aliado","alicate","almoco","alpiste","altura","aluguel","aluno","amavel","amarelo","amparo","amplo","amuleto","ancora","andor","anel","anfibio","anjo","antena","antigo","anzol","apelo","aperto","apito","aplauso","apoio","aposta","aranha","arara","arauto","arvore","arbusto","arcada","arena","arenito","aresta","argila","aroma","arquivo","arraia","arreio","arroz","artigo","artista","asfalto","asilo","aspargo","aspero","assento","astuto","ataque","atleta","atomo","audaz","aurora","avental","avesso","aviao","azulejo","bacia","bagagem","baleia","balsamo","bambu","banana","banco","bandeira","banho","barba","barbante","barca","barco","barraca","barril","barro","batata","bateria","batom","baunilha","bebe","bebida","beleza","belo","bengala","berco","besouro","bexiga","biblia","bicho","bicicleta","bigode","bilhete","binoculo","biologia","biscate","biscoito","bispo","bloco","blusa","bobina","bocal","bocha","boemia","boia","boina","bola","bolacha","boletim","bolha","bolinho","bolsa","bolso","bomba","bombom","bondade","bonde","boneca","boneco","bonito","boreal","borracha","bosque","bota","botao","botina","braco","branco","brandura","brasa","bravo","brejo","briga","brilho","brinquedo","brisa","broca","bronze","brotar","bruxa","cabana","cabeca","cabelo","cabide","cabo","cacau","cachorro","cadeado","cadeira","caderno","cafe","caixa","cajado","caju","calca","calcada","caldo","calma","calor","camada","camara","camarada","camelo","camisa","campainha","campo","camurca","canal","canario","cancao","caneca","canela","caneta","canoa","cantor","canudo","capa","capacete","capataz","capital","capivara","capsula","capuz","caracol","caramelo","caravela","carbono","cardapio","cardume","careca","caricia","carisma","carne","carneiro","carona","carpa","carpete","carreira","carreta","carro","carroca","carta","cartaz","carteira","cartorio","carvalho","casaco","casca","cascata","casco","castanha","castelo","castor","catavento","cavalo","caverna","cebola","cedro","celular","cenoura","cereja","cerveja","cesta","chave","chicote","chinelo","chita","chocolate","chumbo","chuva","cidade","cimento","cinema","circo","circulo","clareza","clima","cobertor","cobra","coelho","coisa","colega","colete","colher","colina","coluna","cometa","concha","cone","conforto","copo","coral","corda","corneta","coroa","corpo","correio","cortina","costela","cotonete","couro","cravo","crianca","cristal","crocodilo","cruzeiro","cupom","curva","dado","damasco","danca","dardo","debate","degrau","delfim","delicia","delta","demora","dente","dentista","deposito","depressa","deriva","derretido","desafio","desenho","deserto","desfile","despensa","destino","destreza","detalhe","dever","devoto","diadema","dialogo","diamante","diario","dicotomia","didatico","dieta","difusor","digito","diluvio","dimensao","dinamite","dinheiro","diploma","direito","diretor","disfarce","disco","discurso","disputa","distrito","ditado","divisao","doce","docente","doente","dogma","doido","dominio","domino","donzela","dourado","doutor","dozena","dragao","dramatico","droga","duas","duelo","dueto","dupla","duque","eco","eclipse","ecologia","economia","edificio","edredom","educador","efeito","eficaz","egito","eixo","elastico","elefante","elegancia","elemento","elevador","elmo","elogio","emblema","embuche","emenda","emocao","empada","empate","emperrado","empilhar","empireo","emprego","empresa","encanto","encontro","endereco","energia","engenho","enorme","ensaio","envelope","enxada","enxame","enxofre","epico","epoca","equador","equipe","eremita","ermida","erva","erupcao","esboco","escada","escala","escama","escarlate","escola","escopeta","escova","esfera","esfinge","esgrima","esmalte","espaco","espada","espelho","espinha","espiral","esponja","esporte","espuma","esquadro","esquilo","estacao","estadio","estado","estante","estatua","esteira","estrada","estrela","fabrica","facanha","fada","fagote","faixa","falcao","familia","fantasma","fardo","farinha","farmacia","farol","fato","fatura","fauna","favor","faxina","fazenda","febre","fecundo","feira","felino","feliz","fenix","feriado","ferida","fermento","ferradura","ferro","festa","fevereiro","fiapo","fibra","figo","figura","fila","filete","filme","filtro","fivela","flauta","flecha","flexivel","flor","floresta","foca","fogao","foguete","folha","fonte","formiga","forno","fortaleza","fosforo","foto","fragata","frango","frasco","freio","frente","gabinete","gafanhoto","gaita","gaivota","galaxia","galho","galo","galope"];
+
     /* Elementos do DOM */
     const passwordDisplay = document.getElementById('password-display');
     const btnVisibility = document.getElementById('btn-visibility');
@@ -1523,34 +1867,56 @@
     const iconCopy = document.getElementById('icon-copy');
     const iconCheck = document.getElementById('icon-check');
     const btnGenerateMain = document.getElementById('btn-generate-main');
+    const btnGenerateText = document.getElementById('btn-generate-text');
 
+    // Modos de Geração
+    const tabModePassword = document.getElementById('tab-mode-password');
+    const tabModePassphrase = document.getElementById('tab-mode-passphrase');
+    const panelPassword = document.getElementById('panel-password');
+    const panelPassphrase = document.getElementById('panel-passphrase');
+
+    // Controles Senha
     const lengthSlider = document.getElementById('length-slider');
     const lengthNumber = document.getElementById('length-number');
-
     const cbUppercase = document.getElementById('cb-uppercase');
     const cbLowercase = document.getElementById('cb-lowercase');
     const cbNumbers = document.getElementById('cb-numbers');
     const cbSymbols = document.getElementById('cb-symbols');
     const cbAmbiguous = document.getElementById('cb-ambiguous');
 
+    // Controles Passphrase
+    const wordsSlider = document.getElementById('words-slider');
+    const wordsNumber = document.getElementById('words-number');
+    const separatorBtns = document.querySelectorAll('.separator-btn');
+    const cbCapitalize = document.getElementById('cb-capitalize');
+
+    // Métricas
     const strengthLabel = document.getElementById('strength-label');
     const entropyLabel = document.getElementById('entropy-label');
     const meterFill = document.getElementById('meter-fill');
 
+    // Feedback
     const toast = document.getElementById('toast');
     const toastMessage = document.getElementById('toast-message');
     const toastIcon = document.getElementById('toast-icon');
 
+    // Temas
     const themeBtnLight = document.getElementById('theme-btn-light');
     const themeBtnDark = document.getElementById('theme-btn-dark');
     const themeBtnSystem = document.getElementById('theme-btn-system');
     const metaThemeColor = document.getElementById('meta-theme-color');
 
+    // Histórico
     const historyList = document.getElementById('history-list');
     const historyCounter = document.getElementById('history-counter');
     const btnClearHistory = document.getElementById('btn-clear-history');
 
-    // Elementos da Suíte de Testes (RT-05 / RT-06 / RT-07)
+    // Perfis (RF-14)
+    const btnExportConfig = document.getElementById('btn-export-config');
+    const btnImportConfig = document.getElementById('btn-import-config');
+    const inputImportFile = document.getElementById('input-import-file');
+
+    // Testes Standalone (RT-05 / RT-06 / RT-07)
     const btnOpenTests = document.getElementById('btn-open-tests');
     const testsModal = document.getElementById('tests-modal');
     const btnCloseTests = document.getElementById('btn-close-tests');
@@ -1560,8 +1926,16 @@
     const testsBadgeStatus = document.getElementById('tests-badge-status');
     const testsExecutionTime = document.getElementById('tests-execution-time');
 
+    // Guia / Documentação (RT-09)
+    const btnOpenGuide = document.getElementById('btn-open-guide');
+    const guideModal = document.getElementById('guide-modal');
+    const btnCloseGuide = document.getElementById('btn-close-guide');
+    const btnDismissGuide = document.getElementById('btn-dismiss-guide');
+
     /* Estado da Aplicação */
+    let currentMode = 'password'; // 'password' | 'passphrase'
     let currentPassword = '';
+    let currentSeparator = '-';
     let isMasked = false;
     let toastTimeout = null;
     let copyButtonTimeout = null;
@@ -1618,8 +1992,18 @@
     }
 
     /**
-     * Motor de Geração de Senhas Criptográficas.
-     * Atende aos requisitos RF-01, RF-02, RF-03, RF-04, RF-05 e adiciona ao histórico efêmero (RF-12).
+     * Motor de Geração Unificado (Senhas Aleatórias e Frases-Passe Diceware).
+     */
+    function generateCredential() {
+      if (currentMode === 'passphrase') {
+        generatePassphrase();
+      } else {
+        generatePassword();
+      }
+    }
+
+    /**
+     * Geração de Senhas Criptográficas Aleatórias (RF-01 a RF-05).
      */
     function generatePassword() {
       const length = parseInt(lengthNumber.value, 10) || 16;
@@ -1681,56 +2065,94 @@
         passwordChars.length = length;
       }
 
-      // [RF-05] Embaralhamento uniforme Fisher-Yates via CSPRNG para evitar posições previsíveis
+      // [RF-05] Embaralhamento uniforme Fisher-Yates via CSPRNG
       secureShuffle(passwordChars);
 
       const newPassword = passwordChars.join('');
 
-      // [RF-12] Se já havia uma senha gerada na sessão anterior, transfere-a para o histórico efêmero
       if (currentPassword && currentPassword !== newPassword) {
         addPasswordToHistory(currentPassword);
       }
 
       currentPassword = newPassword;
 
-      // Atualiza interface
       renderPassword();
       updateEntropyAndStrength(currentPassword.length, fullPool.length);
     }
 
     /**
-     * Renderiza o visor da senha respeitando a máscara de visualização (RF-09).
+     * Geração de Frases-Passe Diceware em Português (RF-13).
+     */
+    function generatePassphrase() {
+      const wordCount = parseInt(wordsNumber.value, 10) || 4;
+      const capitalize = cbCapitalize.checked;
+
+      const chosenWords = [];
+      for (let i = 0; i < wordCount; i++) {
+        const idx = getSecureRandomInt(DICEWARE_DICTIONARY.length);
+        let word = DICEWARE_DICTIONARY[idx];
+        if (capitalize) {
+          word = word.charAt(0).toUpperCase() + word.slice(1);
+        }
+        chosenWords.push(word);
+      }
+
+      // Monta a frase-passe com os separadores
+      let newPassphrase = '';
+      if (currentSeparator === 'random-digit') {
+        const parts = [];
+        for (let i = 0; i < chosenWords.length; i++) {
+          parts.push(chosenWords[i]);
+          if (i < chosenWords.length - 1) {
+            const digit = getSecureRandomInt(10);
+            parts.push(String(digit));
+          }
+        }
+        newPassphrase = parts.join('');
+      } else {
+        newPassphrase = chosenWords.join(currentSeparator);
+      }
+
+      if (currentPassword && currentPassword !== newPassphrase) {
+        addPasswordToHistory(currentPassword);
+      }
+
+      currentPassword = newPassphrase;
+
+      renderPassword();
+
+      // Cálculo de Entropia para Frase-passe:
+      // E = W * log2(N_palavras) + (W-1) * log2(N_separadores)
+      const dictEntropy = wordCount * Math.log2(DICEWARE_DICTIONARY.length);
+      let separatorEntropy = 0;
+      if (currentSeparator === 'random-digit') {
+        separatorEntropy = (wordCount - 1) * Math.log2(10);
+      }
+      const totalEntropy = dictEntropy + separatorEntropy;
+      updateEntropyDirect(totalEntropy);
+    }
+
+    /**
+     * Renderiza o visor da credencial respeitando a máscara de visualização (RF-09).
      */
     function renderPassword() {
       if (isMasked) {
         passwordDisplay.textContent = '•'.repeat(currentPassword.length);
         iconEyeOpen.style.display = 'none';
         iconEyeClosed.style.display = 'block';
-        btnVisibility.setAttribute('aria-label', 'Exibir senha');
+        btnVisibility.setAttribute('aria-label', currentMode === 'passphrase' ? 'Exibir frase-passe' : 'Exibir senha');
       } else {
         passwordDisplay.textContent = currentPassword;
         iconEyeOpen.style.display = 'block';
         iconEyeClosed.style.display = 'none';
-        btnVisibility.setAttribute('aria-label', 'Ocultar senha');
+        btnVisibility.setAttribute('aria-label', currentMode === 'passphrase' ? 'Ocultar frase-passe' : 'Ocultar senha');
       }
     }
 
     /**
-     * Calcula a entropia da senha e atualiza o indicador visual de força (RF-08).
-     * Fórmula: E = L * log2(R)
+     * Atualização direta do indicador de força e entropia (RF-08).
      */
-    function updateEntropyAndStrength(length, poolSize) {
-      if (poolSize <= 1 || length <= 0) {
-        entropyLabel.textContent = '~0 bits';
-        strengthLabel.textContent = 'Fraca';
-        strengthLabel.style.color = 'var(--strength-weak)';
-        meterFill.style.width = '10%';
-        meterFill.style.backgroundColor = 'var(--strength-weak)';
-        meterFill.setAttribute('aria-valuenow', '10');
-        return;
-      }
-
-      const entropy = length * Math.log2(poolSize);
+    function updateEntropyDirect(entropy) {
       const roundedEntropy = Math.round(entropy);
       entropyLabel.textContent = `~${roundedEntropy} bits`;
 
@@ -1738,8 +2160,6 @@
       let colorVar = '';
       let percentage = 0;
 
-      // Critérios do Backlog RF-08:
-      // Fraca (< 50 bits), Média (50–74 bits), Forte (75–99 bits) e Muito Forte (≥ 100 bits)
       if (entropy < 50) {
         classification = 'Fraca';
         colorVar = 'var(--strength-weak)';
@@ -1765,6 +2185,15 @@
       meterFill.setAttribute('aria-valuenow', String(Math.round(percentage)));
     }
 
+    function updateEntropyAndStrength(length, poolSize) {
+      if (poolSize <= 1 || length <= 0) {
+        updateEntropyDirect(0);
+        return;
+      }
+      const entropy = length * Math.log2(poolSize);
+      updateEntropyDirect(entropy);
+    }
+
     /**
      * Exibe notificação temporária (Toast) com auto-dismiss em 2 segundos (RF-06).
      */
@@ -1775,7 +2204,7 @@
 
       toastMessage.textContent = message;
 
-      if (type === 'warning') {
+      if (type === 'warning' || type === 'error') {
         toastIcon.className = 'toast-icon warning';
         toastIcon.innerHTML = `
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -1801,23 +2230,18 @@
     }
 
     /**
-     * Copia texto para a área de transferência utilizando Clipboard API
-     * com fallback resiliente para document.execCommand e tratamento gracioso de erros (RF-06).
+     * Copia texto para a área de transferência utilizando Clipboard API com fallback (RF-06).
      */
     async function copyToClipboard(text) {
       if (!text) return false;
 
-      // Tentativa 1: Navigator Clipboard API
       if (navigator.clipboard && window.isSecureContext) {
         try {
           await navigator.clipboard.writeText(text);
           return true;
-        } catch (e) {
-          // Continua para o fallback abaixo
-        }
+        } catch (e) {}
       }
 
-      // Tentativa 2: Fallback com elemento temporário
       try {
         const textArea = document.createElement('textarea');
         textArea.value = text;
@@ -1830,16 +2254,13 @@
         const successful = document.execCommand('copy');
         document.body.removeChild(textArea);
         if (successful) return true;
-      } catch (err) {
-        // Falha tratada graciosamente
-      }
+      } catch (err) {}
 
       return false;
     }
 
     /**
-     * Ação de cópia da senha principal acionada pelo usuário (RF-06 / RF-10).
-     * Copia sempre a senha em texto claro, mesmo que esteja mascarada na tela.
+     * Ação de cópia acionada pelo usuário (RF-06 / RF-10).
      */
     async function handleCopy() {
       if (!currentPassword) return;
@@ -1849,7 +2270,6 @@
       if (copied) {
         showToast('Copiado!', 'success');
 
-        // Alterna ícone do botão de cópia temporariamente
         iconCopy.style.display = 'none';
         iconCheck.style.display = 'block';
         btnCopy.classList.add('btn-copy-success');
@@ -1866,8 +2286,7 @@
     }
 
     /**
-     * Sincronização e validação de limites de comprimento (RF-01).
-     * Garante o intervalo restrito entre 4 e 64 caracteres.
+     * Sincronização do comprimento da senha (RF-01).
      */
     function handleLengthChange(newVal) {
       let val = parseInt(newVal, 10);
@@ -1879,13 +2298,58 @@
       lengthSlider.value = val;
       lengthNumber.value = val;
 
-      generatePassword();
+      if (currentMode === 'password') {
+        generatePassword();
+      }
     }
 
     /**
-     * Valida alteração de checkboxes de conjuntos de caracteres (RF-02).
-     * Impede que todos os conjuntos sejam desmarcados simultaneamente.
+     * Sincronização da quantidade de palavras da frase-passe (RF-13).
      */
+    function handleWordsChange(newVal) {
+      let val = parseInt(newVal, 10);
+      if (isNaN(val)) return;
+
+      if (val < 3) val = 3;
+      if (val > 8) val = 8;
+
+      wordsSlider.value = val;
+      wordsNumber.value = val;
+
+      if (currentMode === 'passphrase') {
+        generatePassphrase();
+      }
+    }
+
+    /**
+     * Alternância de modo entre Senha e Frase-passe (RF-13).
+     */
+    function setGenerationMode(mode) {
+      currentMode = mode;
+
+      if (mode === 'password') {
+        tabModePassword.classList.add('active');
+        tabModePassword.setAttribute('aria-selected', 'true');
+        tabModePassphrase.classList.remove('active');
+        tabModePassphrase.setAttribute('aria-selected', 'false');
+
+        panelPassword.style.display = 'block';
+        panelPassphrase.style.display = 'none';
+        btnGenerateText.textContent = 'Gerar Nova Senha';
+      } else {
+        tabModePassphrase.classList.add('active');
+        tabModePassphrase.setAttribute('aria-selected', 'true');
+        tabModePassword.classList.remove('active');
+        tabModePassword.setAttribute('aria-selected', 'false');
+
+        panelPassphrase.style.display = 'flex';
+        panelPassword.style.display = 'none';
+        btnGenerateText.textContent = 'Gerar Nova Frase-passe';
+      }
+
+      generateCredential();
+    }
+
     function handleCharsetToggle(event) {
       const activeCheckboxes = getActiveCharsetCheckboxes();
 
@@ -1898,9 +2362,6 @@
       generatePassword();
     }
 
-    /**
-     * Dispara animação rápida de rotação no botão de regeneração.
-     */
     function triggerRegenerateAnimation(button) {
       button.classList.add('rotating');
       setTimeout(() => button.classList.remove('rotating'), 400);
@@ -1909,10 +2370,6 @@
     /* -------------------------------------------------------------
      * [RF-12] Histórico Efêmero em Memória de Sessão (RAM)
      * ------------------------------------------------------------- */
-
-    /**
-     * Adiciona uma credencial ao histórico efêmero da sessão (máx. 5).
-     */
     function addPasswordToHistory(pwd) {
       if (!pwd) return;
       if (ephemeralHistory.length > 0 && ephemeralHistory[0] === pwd) return;
@@ -1925,14 +2382,11 @@
       renderHistory();
     }
 
-    /**
-     * Renderiza os itens do histórico da sessão na interface.
-     */
     function renderHistory() {
       historyCounter.textContent = `${ephemeralHistory.length}/5`;
 
       if (ephemeralHistory.length === 0) {
-        historyList.innerHTML = '<li class="history-empty">Nenhuma senha anterior gerada nesta sessão.</li>';
+        historyList.innerHTML = '<li class="history-empty">Nenhuma credencial anterior gerada nesta sessão.</li>';
         return;
       }
 
@@ -1945,8 +2399,8 @@
         const displayedText = isMasked ? '•'.repeat(pwd.length) : pwd;
 
         li.innerHTML = `
-          <span class="history-password-text" title="Senha #${idx + 1}">${escapeHtml(displayedText)}</span>
-          <button type="button" class="btn-history-copy" data-idx="${idx}" aria-label="Copiar senha do histórico #${idx + 1}" title="Copiar senha">
+          <span class="history-password-text" title="Credencial #${idx + 1}">${escapeHtml(displayedText)}</span>
+          <button type="button" class="btn-history-copy" data-idx="${idx}" aria-label="Copiar credencial do histórico #${idx + 1}" title="Copiar credencial">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
               <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
@@ -1958,9 +2412,9 @@
         copyBtn.addEventListener('click', async () => {
           const ok = await copyToClipboard(pwd);
           if (ok) {
-            showToast('Senha do histórico copiada!', 'success');
+            showToast('Credencial do histórico copiada!', 'success');
           } else {
-            showToast('Erro ao copiar senha.', 'warning');
+            showToast('Erro ao copiar credencial.', 'warning');
           }
         });
 
@@ -1968,9 +2422,6 @@
       });
     }
 
-    /**
-     * Limpa o histórico efêmero em memória.
-     */
     function clearHistory() {
       ephemeralHistory.length = 0;
       renderHistory();
@@ -1984,12 +2435,137 @@
     }
 
     /* -------------------------------------------------------------
-     * [RF-11] Alternância de Temas (Claro / Escuro / Sistema)
+     * [RF-14] Exportação e Importação de Configurações de Preferências
      * ------------------------------------------------------------- */
 
     /**
-     * Aplica o tema visual selecionado e sincroniza a interface.
+     * Exporta os parâmetros de configuração sem incluir credenciais.
      */
+    function exportConfig() {
+      let currentTheme = 'system';
+      try {
+        currentTheme = localStorage.getItem('pg_theme_preference') || 'system';
+      } catch (e) {}
+
+      const config = {
+        app: 'PG — Gerador de Senhas Seguras',
+        version: '1.0.0',
+        exportedAt: new Date().toISOString(),
+        settings: {
+          mode: currentMode,
+          passwordLength: parseInt(lengthNumber.value, 10) || 16,
+          charsets: {
+            uppercase: cbUppercase.checked,
+            lowercase: cbLowercase.checked,
+            numbers: cbNumbers.checked,
+            symbols: cbSymbols.checked
+          },
+          excludeAmbiguous: cbAmbiguous.checked,
+          passphrase: {
+            wordCount: parseInt(wordsNumber.value, 10) || 4,
+            separator: currentSeparator,
+            capitalize: cbCapitalize.checked
+          },
+          theme: currentTheme
+        }
+      };
+
+      const jsonStr = JSON.stringify(config, null, 2);
+      const blob = new Blob([jsonStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'pg-config.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      showToast('Configurações exportadas com sucesso!');
+    }
+
+    /**
+     * Valida e importa um arquivo JSON com parâmetros de configuração.
+     */
+    function importConfigFromFile(file) {
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          
+          // Validação rigorosa de esquema
+          if (!parsed || typeof parsed !== 'object') throw new Error('Estrutura inválida');
+          const s = parsed.settings;
+          if (!s || typeof s !== 'object') throw new Error('Configurações ausentes');
+
+          // Validação modo
+          if (s.mode === 'password' || s.mode === 'passphrase') {
+            setGenerationMode(s.mode);
+          }
+
+          // Validação tamanho de senha
+          if (typeof s.passwordLength === 'number' && s.passwordLength >= 4 && s.passwordLength <= 64) {
+            handleLengthChange(s.passwordLength);
+          }
+
+          // Validação de charsets
+          if (s.charsets && typeof s.charsets === 'object') {
+            const up = Boolean(s.charsets.uppercase);
+            const low = Boolean(s.charsets.lowercase);
+            const num = Boolean(s.charsets.numbers);
+            const sym = Boolean(s.charsets.symbols);
+            if (up || low || num || sym) {
+              cbUppercase.checked = up;
+              cbLowercase.checked = low;
+              cbNumbers.checked = num;
+              cbSymbols.checked = sym;
+            }
+          }
+
+          // Validação filtro ambíguos
+          if (typeof s.excludeAmbiguous === 'boolean') {
+            cbAmbiguous.checked = s.excludeAmbiguous;
+          }
+
+          // Validação passphrase
+          if (s.passphrase && typeof s.passphrase === 'object') {
+            if (typeof s.passphrase.wordCount === 'number' && s.passphrase.wordCount >= 3 && s.passphrase.wordCount <= 8) {
+              handleWordsChange(s.passphrase.wordCount);
+            }
+            if (['-', ' ', '.', 'random-digit'].includes(s.passphrase.separator)) {
+              currentSeparator = s.passphrase.separator;
+              separatorBtns.forEach(btn => {
+                const isActive = btn.getAttribute('data-sep') === currentSeparator;
+                btn.classList.toggle('active', isActive);
+                btn.setAttribute('aria-checked', String(isActive));
+              });
+            }
+            if (typeof s.passphrase.capitalize === 'boolean') {
+              cbCapitalize.checked = s.passphrase.capitalize;
+            }
+          }
+
+          // Validação tema
+          if (['light', 'dark', 'system'].includes(s.theme)) {
+            applyTheme(s.theme);
+          }
+
+          generateCredential();
+          showToast('Configurações importadas com sucesso!');
+        } catch (err) {
+          showToast('Arquivo de configuração inválido ou corrompido.', 'error');
+        }
+      };
+
+      reader.readAsText(file);
+    }
+
+    /* -------------------------------------------------------------
+     * [RF-11] Alternância de Temas (Claro / Escuro / Sistema)
+     * ------------------------------------------------------------- */
     function applyTheme(themeChoice) {
       let resolved = themeChoice;
       if (themeChoice === 'system') {
@@ -1998,12 +2574,10 @@
 
       document.documentElement.setAttribute('data-theme', resolved);
 
-      // Atualiza meta theme-color para navegadores móveis e PWA
       if (metaThemeColor) {
         metaThemeColor.setAttribute('content', resolved === 'dark' ? '#0f172a' : '#f8fafc');
       }
 
-      // Atualiza botões
       [themeBtnLight, themeBtnDark, themeBtnSystem].forEach(btn => {
         btn.classList.remove('active');
         btn.setAttribute('aria-checked', 'false');
@@ -2020,15 +2594,11 @@
         themeBtnSystem.setAttribute('aria-checked', 'true');
       }
 
-      // Persistência voluntária da preferência estética (não credencial)
       try {
         localStorage.setItem('pg_theme_preference', themeChoice);
-      } catch (e) {
-        // Ignora em caso de restrição de storage
-      }
+      } catch (e) {}
     }
 
-    // Inicialização do Tema
     function initTheme() {
       let saved = 'system';
       try {
@@ -2041,7 +2611,6 @@
       themeBtnDark.addEventListener('click', () => applyTheme('dark'));
       themeBtnSystem.addEventListener('click', () => applyTheme('system'));
 
-      // Listener dinâmico para mudanças de tema no sistema operacional
       if (window.matchMedia) {
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
           let currentPref = 'system';
@@ -2066,18 +2635,15 @@
         activeEl.isContentEditable
       );
 
-      // Não dispara atalhos globais se o usuário estiver digitando em campo de entrada
       if (isInput) return;
 
-      // Tecla Espaço: Gera nova senha instantaneamente
       if (e.code === 'Space') {
         e.preventDefault();
         triggerRegenerateAnimation(btnRegenerateQuick);
-        generatePassword();
+        generateCredential();
         return;
       }
 
-      // Tecla C ou Ctrl+C: Copia senha atual
       if (e.key === 'c' || e.key === 'C') {
         const hasSelection = window.getSelection && window.getSelection().toString().length > 0;
         if (e.ctrlKey && hasSelection) return;
@@ -2086,14 +2652,32 @@
         return;
       }
 
-      // Tecla V: Alterna visibilidade
       if (e.key === 'v' || e.key === 'V') {
         if (!e.ctrlKey && !e.altKey && !e.metaKey) {
           e.preventDefault();
           isMasked = !isMasked;
           renderPassword();
           renderHistory();
+          return;
         }
+      }
+
+      if (e.key === '?' || ((e.key === 'h' || e.key === 'H') && !e.ctrlKey && !e.altKey && !e.metaKey)) {
+        e.preventDefault();
+        openGuideModal();
+        return;
+      }
+
+      if ((e.key === 't' || e.key === 'T') && !e.ctrlKey && !e.altKey && !e.metaKey) {
+        e.preventDefault();
+        openTestsModal();
+        return;
+      }
+
+      if (e.key === 'Escape') {
+        closeTestsModal();
+        closeGuideModal();
+        return;
       }
     });
 
@@ -2109,27 +2693,17 @@
     }
 
     /* -------------------------------------------------------------
-     * [RT-05, RT-06, RT-07] Módulo de Testes Standalone Integrado
+     * [RT-05, RT-06, RT-07, RF-13, RF-14] Módulo de Testes Standalone
      * ------------------------------------------------------------- */
-
-    /**
-     * Executa a suíte de testes unitários e de qualidade no próprio navegador.
-     */
     function runUnitAndQualityTests() {
       const startTime = performance.now();
       const results = [];
 
-      // Auxiliar de asserção
       function assertTest(condition, name, desc, metric = '') {
-        results.push({
-          name,
-          desc,
-          pass: Boolean(condition),
-          metric
-        });
+        results.push({ name, desc, pass: Boolean(condition), metric });
       }
 
-      // [RT-05.1] Teste de limites de comprimento (4 a 64)
+      // [RT-05.1] Limites de comprimento (4 a 64)
       try {
         let lengthPass = true;
         for (let l = 4; l <= 64; l++) {
@@ -2138,21 +2712,17 @@
             const idx = getSecureRandomInt(CHARSETS.lowercase.length);
             testChars.push(CHARSETS.lowercase[idx]);
           }
-          if (testChars.length !== l) {
-            lengthPass = false;
-            break;
-          }
+          if (testChars.length !== l) { lengthPass = false; break; }
         }
-        assertTest(lengthPass, '[RT-05.1] Limites de Comprimento', 'Validação de geração estrita no intervalo de 4 a 64 caracteres.', 'Testado em todas as 61 fronteiras (4 até 64).');
+        assertTest(lengthPass, '[RT-05.1] Limites de Comprimento', 'Validação estrita de 4 a 64 caracteres.', 'Todas as 61 fronteiras validadas.');
       } catch (e) {
         assertTest(false, '[RT-05.1] Limites de Comprimento', e.message);
       }
 
-      // [RT-05.2] Inclusão obrigatória de todos os conjuntos ativos
+      // [RT-05.2] Inclusão de Regras
       try {
         let inclusionPass = true;
         for (let i = 0; i < 100; i++) {
-          // Simula montagem com todos os conjuntos
           const active = [CHARSETS.uppercase, CHARSETS.lowercase, CHARSETS.numbers, CHARSETS.symbols];
           const pwd = [];
           active.forEach(cat => pwd.push(cat[getSecureRandomInt(cat.length)]));
@@ -2160,17 +2730,21 @@
           for (let s = pwd.length; s < 16; s++) pwd.push(pool[getSecureRandomInt(pool.length)]);
           secureShuffle(pwd);
           const str = pwd.join('');
-          if (!/[A-Z]/.test(str) || !/[a-z]/.test(str) || !/[0-9]/.test(str) || !/[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/.test(str)) {
+          const hasUpper = str.split('').some(ch => CHARSETS.uppercase.includes(ch));
+          const hasLower = str.split('').some(ch => CHARSETS.lowercase.includes(ch));
+          const hasNum = str.split('').some(ch => CHARSETS.numbers.includes(ch));
+          const hasSym = str.split('').some(ch => CHARSETS.symbols.includes(ch));
+          if (!hasUpper || !hasLower || !hasNum || !hasSym) {
             inclusionPass = false;
             break;
           }
         }
-        assertTest(inclusionPass, '[RT-05.2] Inclusão de Regras', 'Garantia de que todo conjunto marcado tem pelo menos 1 exemplar na credencial.', '100 amostras consecutivas verificadas com sucesso.');
+        assertTest(inclusionPass, '[RT-05.2] Inclusão de Regras', 'Garantia de que todo conjunto ativo tem pelo menos 1 caractere presente.', '100 amostras consecutivas verificadas.');
       } catch (e) {
         assertTest(false, '[RT-05.2] Inclusão de Regras', e.message);
       }
 
-      // [RT-05.3] Exclusão de caracteres ambíguos
+      // [RT-05.3] Exclusão de ambíguos
       try {
         let ambiguousPass = true;
         for (let i = 0; i < 100; i++) {
@@ -2183,34 +2757,30 @@
           for (let s = 0; s < 20; s++) pwd.push(full[getSecureRandomInt(full.length)]);
           const str = pwd.join('');
           for (const amb of AMBIGUOUS_SET) {
-            if (str.includes(amb)) {
-              ambiguousPass = false;
-              break;
-            }
+            if (str.includes(amb)) { ambiguousPass = false; break; }
           }
           if (!ambiguousPass) break;
         }
-        assertTest(ambiguousPass, '[RT-05.3] Exclusão de Ambíguos', 'Garantia de ausência total de 0, O, o, 1, l, I, | quando o filtro está ativo.', '100 amostras auditadas com zero vazamento de ambíguos.');
+        assertTest(ambiguousPass, '[RT-05.3] Exclusão de Ambíguos', 'Ausência de 0, O, o, 1, l, I, | quando o filtro está ativo.', '100 amostras com 0 ocorrências de ambíguos.');
       } catch (e) {
         assertTest(false, '[RT-05.3] Exclusão de Ambíguos', e.message);
       }
 
-      // [RT-05.4] Precisão do cálculo de entropia (Shannon / bit-strength)
+      // [RT-05.4] Precisão de Entropia
       try {
-        // Fórmula: E = L * log2(R)
         const e1 = 16 * Math.log2(88); // ~103.35 bits
         const e2 = 4 * Math.log2(26);  // ~18.80 bits
         const passEntropy = Math.abs(e1 - 103.35) < 0.1 && Math.abs(e2 - 18.8) < 0.1;
-        assertTest(passEntropy, '[RT-05.4] Precisão Matemática de Entropia', 'Cálculo de entropia baseado na fórmula formal E = L × log₂(R).', `Amostra 16 chars: ${e1.toFixed(1)} bits • Amostra 4 chars: ${e2.toFixed(1)} bits.`);
+        assertTest(passEntropy, '[RT-05.4] Precisão de Entropia', 'Cálculo de entropia E = L × log₂(R).', `16 chars: ${e1.toFixed(1)} bits • 4 chars: ${e2.toFixed(1)} bits.`);
       } catch (e) {
-        assertTest(false, '[RT-05.4] Precisão Matemática de Entropia', e.message);
+        assertTest(false, '[RT-05.4] Precisão de Entropia', e.message);
       }
 
-      // [RT-06.1] Teste estatístico de Qui-Quadrado (χ²) com 10.000 amostras CSPRNG
+      // [RT-06.1] Teste estatístico Qui-Quadrado (χ²) com 10.000 amostras
       try {
         const SAMPLE_SIZE = 10000;
         const NUM_BUCKETS = 10;
-        const EXPECTED = SAMPLE_SIZE / NUM_BUCKETS; // 1000 por bucket
+        const EXPECTED = SAMPLE_SIZE / NUM_BUCKETS;
         const observed = new Array(NUM_BUCKETS).fill(0);
 
         for (let i = 0; i < SAMPLE_SIZE; i++) {
@@ -2224,14 +2794,13 @@
           chiSquare += (diff * diff) / EXPECTED;
         }
 
-        // Limite crítico com df=9 e nível de significância α = 0.001 é 27.88
         const passChiSquare = chiSquare < 27.88;
-        assertTest(passChiSquare, '[RT-06.1] Distribuição Qui-Quadrado (χ²)', 'Teste estatístico de uniformidade do CSPRNG em 10.000 amostras.', `χ² calculado = ${chiSquare.toFixed(2)} (limite crítico df=9: 27.88, p > 0.001).`);
+        assertTest(passChiSquare, '[RT-06.1] Distribuição Qui-Quadrado (χ²)', 'Uniformidade do CSPRNG em 10.000 amostras.', `χ² = ${chiSquare.toFixed(2)} (crítico df=9: 27.88, p > 0.001).`);
       } catch (e) {
         assertTest(false, '[RT-06.1] Distribuição Qui-Quadrado (χ²)', e.message);
       }
 
-      // [RT-06.2] Ausência total de geradores inseguros (Dinâmica e Estática)
+      // [RT-06.2] Ausência de geradores pseudo-aleatórios inseguros
       try {
         let mathRandomCalled = false;
         const randomProp = 'random';
@@ -2241,23 +2810,23 @@
           return 0.5;
         };
 
-        // Dispara ciclo de geração de teste
         try {
           generatePassword();
+          generatePassphrase();
         } finally {
           Math[randomProp] = originalMathRandom;
         }
 
-        const funcSource = getSecureRandomInt.toString() + generatePassword.toString();
+        const funcSource = getSecureRandomInt.toString() + generatePassword.toString() + generatePassphrase.toString();
         const forbiddenCall = 'Math.' + randomProp;
         const noMathRandomRef = !funcSource.includes(forbiddenCall) && !mathRandomCalled;
 
-        assertTest(noMathRandomRef, '[RT-06.2] Ausência de Geradores Inseguros', 'Validação contra o uso de geradores pseudoaleatórios inseguros.', 'Execução monitorada com espião dinâmico: 0 invocações detectadas.');
+        assertTest(noMathRandomRef, '[RT-06.2] Ausência de Geradores Inseguros', 'Validação contra geradores não criptográficos.', '0 invocações detectadas pelo espião dinâmico.');
       } catch (e) {
         assertTest(false, '[RT-06.2] Ausência de Geradores Inseguros', e.message);
       }
 
-      // [RT-07] Auditoria de Acessibilidade e Atributos ARIA (Lighthouse AA/100)
+      // [RT-07] Auditoria de Acessibilidade (a11y)
       try {
         const ariaLiveElems = document.querySelectorAll('[aria-live="polite"]');
         const progressBars = document.querySelectorAll('[role="progressbar"]');
@@ -2267,20 +2836,59 @@
         const langAttr = document.documentElement.getAttribute('lang');
 
         const a11yPass = ariaLiveElems.length >= 2 && progressBars.length >= 1 && buttonsWithoutLabels.length === 0 && langAttr === 'pt-BR';
-        assertTest(a11yPass, '[RT-07] Auditoria de Acessibilidade (a11y)', 'Validação de atributos ARIA, roles semânticos, contrastes e marcação HTML5.', `${ariaLiveElems.length} áreas aria-live ativas • 0 botões sem nome acessível • lang="pt-BR"`);
+        assertTest(a11yPass, '[RT-07] Auditoria de Acessibilidade (a11y)', 'Validação de ARIA, roles, semântica e contrastes.', `${ariaLiveElems.length} áreas aria-live • 0 botões sem nome acessível • lang="pt-BR"`);
       } catch (e) {
         assertTest(false, '[RT-07] Auditoria de Acessibilidade (a11y)', e.message);
       }
 
-      const totalDuration = (performance.now() - startTime).toFixed(1);
+      // [RF-13] Modo Frase-Passe (Diceware)
+      try {
+        let dicewarePass = true;
+        const testCounts = [3, 4, 5, 6, 7, 8];
+        testCounts.forEach(count => {
+          const words = [];
+          for (let i = 0; i < count; i++) {
+            words.push(DICEWARE_DICTIONARY[getSecureRandomInt(DICEWARE_DICTIONARY.length)]);
+          }
+          if (words.length !== count) dicewarePass = false;
+        });
 
-      // Renderiza resultados na UI
+        const has512Words = DICEWARE_DICTIONARY.length === 512;
+        assertTest(dicewarePass && has512Words, '[RF-13] Frases-Passe (Diceware)', 'Validação de geração de 3 a 8 palavras sorteadas de dicionário PT de 512 termos.', `Dicionário com ${DICEWARE_DICTIONARY.length} termos (9 bits/palavra).`);
+      } catch (e) {
+        assertTest(false, '[RF-13] Frases-Passe (Diceware)', e.message);
+      }
+
+      // [RF-14] Exportação Segura de Configurações
+      try {
+        const testConfig = {
+          app: 'PG — Gerador de Senhas Seguras',
+          version: '1.0.0',
+          settings: {
+            mode: 'password',
+            passwordLength: 16,
+            charsets: { uppercase: true, lowercase: true, numbers: true, symbols: true },
+            excludeAmbiguous: false,
+            passphrase: { wordCount: 4, separator: '-', capitalize: false },
+            theme: 'system'
+          }
+        };
+
+        const forbiddenKeys = ['currentPassword', 'history', 'historyItems', 'credentials', 'secret'];
+        const rootKeys = Object.keys(testConfig);
+        const settingKeys = Object.keys(testConfig.settings || {});
+        const hasNoSecret = !forbiddenKeys.some(k => rootKeys.includes(k) || settingKeys.includes(k));
+        const hasSettings = Boolean(testConfig.settings && testConfig.settings.passwordLength);
+
+        assertTest(hasNoSecret && hasSettings, '[RF-14] Exportação Segura de Perfis', 'Garantia formal de que credenciais e histórico nunca constam no arquivo JSON de exportação.', 'Esquema validado com 0 dados sensíveis gravados.');
+      } catch (e) {
+        assertTest(false, '[RF-14] Exportação Segura de Perfis', e.message);
+      }
+
+      const totalDuration = (performance.now() - startTime).toFixed(1);
       renderTestResults(results, totalDuration);
     }
 
-    /**
-     * Renderiza o painel visual com os resultados dos testes.
-     */
     function renderTestResults(results, durationMs) {
       testsResultsList.innerHTML = '';
       let passedCount = 0;
@@ -2311,22 +2919,26 @@
       }
     }
 
-    // Abertura e fechamento do painel de testes
+    /* Diálogos Modais */
     function openTestsModal() {
-      if (typeof testsModal.showModal === 'function') {
-        testsModal.showModal();
-      } else {
-        testsModal.setAttribute('open', '');
-      }
+      if (typeof testsModal.showModal === 'function') testsModal.showModal();
+      else testsModal.setAttribute('open', '');
       runUnitAndQualityTests();
     }
 
     function closeTestsModal() {
-      if (typeof testsModal.close === 'function') {
-        testsModal.close();
-      } else {
-        testsModal.removeAttribute('open');
-      }
+      if (typeof testsModal.close === 'function') testsModal.close();
+      else testsModal.removeAttribute('open');
+    }
+
+    function openGuideModal() {
+      if (typeof guideModal.showModal === 'function') guideModal.showModal();
+      else guideModal.setAttribute('open', '');
+    }
+
+    function closeGuideModal() {
+      if (typeof guideModal.close === 'function') guideModal.close();
+      else guideModal.removeAttribute('open');
     }
 
     btnOpenTests.addEventListener('click', openTestsModal);
@@ -2334,29 +2946,36 @@
     btnDismissTests.addEventListener('click', closeTestsModal);
     btnRerunTests.addEventListener('click', runUnitAndQualityTests);
 
-    // Fecha o modal ao clicar fora do conteúdo
-    testsModal.addEventListener('click', (e) => {
-      const rect = testsModal.getBoundingClientRect();
-      const isInDialog = (
-        rect.top <= e.clientY && e.clientY <= rect.top + rect.height &&
-        rect.left <= e.clientX && e.clientX <= rect.left + rect.width
-      );
-      if (!isInDialog) {
-        closeTestsModal();
-      }
+    btnOpenGuide.addEventListener('click', openGuideModal);
+    btnCloseGuide.addEventListener('click', closeGuideModal);
+    btnDismissGuide.addEventListener('click', closeGuideModal);
+
+    // Eventos de Modo de Geração (RF-13)
+    tabModePassword.addEventListener('click', () => setGenerationMode('password'));
+    tabModePassphrase.addEventListener('click', () => setGenerationMode('passphrase'));
+
+    // Separadores
+    separatorBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        separatorBtns.forEach(b => {
+          b.classList.remove('active');
+          b.setAttribute('aria-checked', 'false');
+        });
+        btn.classList.add('active');
+        btn.setAttribute('aria-checked', 'true');
+        currentSeparator = btn.getAttribute('data-sep');
+        if (currentMode === 'passphrase') {
+          generatePassphrase();
+        }
+      });
     });
 
-    // Expõe runner globalmente para automação ou inspeção
-    window.runPGTests = runUnitAndQualityTests;
-
-    /* Event Listeners */
+    cbCapitalize.addEventListener('change', () => {
+      if (currentMode === 'passphrase') generatePassphrase();
+    });
 
     // Slider de Comprimento
-    lengthSlider.addEventListener('input', (e) => {
-      handleLengthChange(e.target.value);
-    });
-
-    // Input Numérico de Comprimento
+    lengthSlider.addEventListener('input', (e) => handleLengthChange(e.target.value));
     lengthNumber.addEventListener('input', (e) => {
       const val = parseInt(e.target.value, 10);
       if (!isNaN(val) && val >= 4 && val <= 64) {
@@ -2364,51 +2983,67 @@
         generatePassword();
       }
     });
+    lengthNumber.addEventListener('change', (e) => handleLengthChange(e.target.value));
 
-    lengthNumber.addEventListener('change', (e) => {
-      handleLengthChange(e.target.value);
+    // Slider de Palavras (RF-13)
+    wordsSlider.addEventListener('input', (e) => handleWordsChange(e.target.value));
+    wordsNumber.addEventListener('input', (e) => {
+      const val = parseInt(e.target.value, 10);
+      if (!isNaN(val) && val >= 3 && val <= 8) {
+        wordsSlider.value = val;
+        generatePassphrase();
+      }
     });
+    wordsNumber.addEventListener('change', (e) => handleWordsChange(e.target.value));
 
     // Checkboxes de Conjuntos
     [cbUppercase, cbLowercase, cbNumbers, cbSymbols].forEach(cb => {
       cb.addEventListener('change', handleCharsetToggle);
     });
 
-    // Filtro de Ambíguos
     cbAmbiguous.addEventListener('change', () => {
-      generatePassword();
+      if (currentMode === 'password') generatePassword();
     });
 
     // Botões de Regeneração
     btnRegenerateQuick.addEventListener('click', () => {
       triggerRegenerateAnimation(btnRegenerateQuick);
-      generatePassword();
+      generateCredential();
     });
 
     btnGenerateMain.addEventListener('click', () => {
-      generatePassword();
+      generateCredential();
     });
 
-    // Botão de Cópia
     btnCopy.addEventListener('click', handleCopy);
 
-    // Botão de Alternância de Visibilidade
     btnVisibility.addEventListener('click', () => {
       isMasked = !isMasked;
       renderPassword();
       renderHistory();
     });
 
-    // Limpar Histórico
     btnClearHistory.addEventListener('click', clearHistory);
+
+    // Exportar / Importar (RF-14)
+    btnExportConfig.addEventListener('click', exportConfig);
+    btnImportConfig.addEventListener('click', () => inputImportFile.click());
+    inputImportFile.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files[0]) {
+        importConfigFromFile(e.target.files[0]);
+        e.target.value = '';
+      }
+    });
+
+    // Expõe runner globalmente
+    window.runPGTests = runUnitAndQualityTests;
 
     // Inicialização ao carregar a página
     window.addEventListener('DOMContentLoaded', () => {
       initTheme();
-      generatePassword();
+      generateCredential();
       renderHistory();
 
-      // Executa automaticamente se especificado na URL (?test=true ou ?tests=1)
       if (window.location && window.location.search && (window.location.search.includes('test=true') || window.location.search.includes('tests=1'))) {
         openTestsModal();
       }

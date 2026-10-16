@@ -139,24 +139,24 @@ Foco em consolidação para produção, novos modos de geração amigáveis e ho
 
 ### [RF-13] Modo de Geração de Frases-Passe (*Passphrases* / Diceware)
 - **Descrição:** Modalidade alternativa de geração baseada em palavras aleatórias legíveis e fáceis de memorizar.
-- [ ] Seletor de modo entre "Senha Aleatória" e "Frase-passe (Diceware)".
-- [ ] Controle para definição da quantidade de palavras (de 3 a 8 palavras).
-- [ ] Dicionário embutido e compacto de palavras selecionadas em português.
-- [ ] Opção de escolha do separador entre as palavras (hífen, espaço, ponto ou dígito aleatório).
+- [x] Seletor de modo entre "Senha Aleatória" e "Frase-passe (Diceware)".
+- [x] Controle para definição da quantidade de palavras (de 3 a 8 palavras).
+- [x] Dicionário embutido e compacto de palavras selecionadas em português.
+- [x] Opção de escolha do separador entre as palavras (hífen, espaço, ponto ou dígito aleatório).
 
 ### [RF-14] Exportação e Importação de Configurações de Preferências
 - **Descrição:** Mecanismo seguro para salvar e carregar perfis de regras sem gravar senhas.
-- [ ] Botão para exportar arquivo `.json` contendo estritamente os parâmetros de configuração (tamanho preferido, conjuntos ativos, exclusão de ambíguos).
-- [ ] Botão para importar arquivo `.json` com validação de esquema contra dados corrompidos.
-- [ ] Garantia formal de que nenhuma senha ou credencial gerada seja gravada no arquivo de configuração.
+- [x] Botão para exportar arquivo `.json` contendo estritamente os parâmetros de configuração (tamanho preferido, conjuntos ativos, exclusão de ambíguos).
+- [x] Botão para importar arquivo `.json` com validação de esquema contra dados corrompidos.
+- [x] Garantia formal de que nenhuma senha ou credencial gerada seja gravada no arquivo de configuração.
 
 ### [RT-08] Homologação Cross-Browser e Multiplataforma
 - **Descrição:** Verificação formal de compatibilidade e experiência em múltiplos ecossistemas.
-- [ ] Homologação em navegadores desktop: Google Chrome, Mozilla Firefox, Apple Safari e Microsoft Edge.
-- [ ] Homologação em navegadores mobile: Chrome (Android) e Safari (iOS).
-- [ ] Validação de responsividade táctil e ausência de bugs visuais em orientações retrato e paisagem.
+- [x] Homologação em navegadores desktop: Google Chrome, Mozilla Firefox, Apple Safari e Microsoft Edge.
+- [x] Homologação em navegadores mobile: Chrome (Android) e Safari (iOS).
+- [x] Validação de responsividade táctil e ausência de bugs visuais em orientações retrato e paisagem.
 
 ### [RT-09] Documentação Consolidada e Fechamento de Release
 - **Descrição:** Entrega da versão final homologada para o usuário final.
-- [ ] Documentação de usuário final e manual de atalhos incorporados.
-- [ ] Criação de tag Git formal `v1.0.0` com notas de lançamento consolidadas no repositório.
+- [x] Documentação de usuário final e manual de atalhos incorporados.
+- [x] Criação de tag Git formal `v1.0.0` com notas de lançamento consolidadas no repositório.

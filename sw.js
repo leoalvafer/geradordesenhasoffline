@@ -1,5 +1,5 @@
-/* Service Worker para PWA — PG Gerador de Senhas Seguras (Release v0.3.0) */
-const CACHE_NAME = 'pg-cache-v0.3.0';
+/* Service Worker para PWA — PG Gerador de Senhas Seguras (Release Final v1.0.0) */
+const CACHE_NAME = 'pg-cache-v1.0.0';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -39,7 +39,6 @@ self.addEventListener('activate', (event) => {
 
 // Interceptação de requisições: Cache First com fallback de rede
 self.addEventListener('fetch', (event) => {
-  // Apenas intercepta métodos GET seguros
   if (event.request.method !== 'GET') return;
 
   event.respondWith(
@@ -48,7 +47,6 @@ self.addEventListener('fetch', (event) => {
         return cachedResponse;
       }
       return fetch(event.request).then((networkResponse) => {
-        // Armazena dinamicamente se for uma resposta válida do mesmo escopo
         if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
           return networkResponse;
         }
@@ -58,7 +56,6 @@ self.addEventListener('fetch', (event) => {
         });
         return networkResponse;
       }).catch(() => {
-        // Fallback offline para documento principal
         if (event.request.mode === 'navigate') {
           return caches.match('./index.html');
         }
