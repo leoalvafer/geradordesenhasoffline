@@ -1,10 +1,35 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PG — Gerador de Senhas Seguras</title>
-  <meta name="description" content="Aplicação standalone para geração de senhas seguras com criptografia nativa (CSPRNG), sem dependências e sem conexões de rede.">
+  <meta name="description" content="Aplicação PWA standalone para geração de senhas seguras com criptografia nativa (CSPRNG), temas customizáveis e operação 100% offline.">
+  
+  <!-- Configurações PWA e Metadados -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="icon.svg">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <meta name="theme-color" content="#0f172a" id="meta-theme-color">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <!-- Script Inline Anti-Flash para Aplicação Instantânea de Tema (RF-11) -->
+  <script>
+    (function() {
+      try {
+        const savedPref = localStorage.getItem('pg_theme_preference') || 'system';
+        let resolvedTheme = savedPref;
+        if (savedPref === 'system') {
+          resolvedTheme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        document.documentElement.setAttribute('data-theme', resolvedTheme);
+      } catch (e) {
+        // Fallback gracioso caso storage esteja bloqueado
+      }
+    })();
+  </script>
+
   <style>
     /* Reset & Variáveis Base */
     *, *::before, *::after {
@@ -13,8 +38,9 @@
       padding: 0;
     }
 
-    :root {
+    :root, [data-theme="dark"] {
       --bg-gradient: radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 100%);
+      --bg-base: #0f172a;
       --card-bg: #1e293b;
       --card-subtle: #0f172a;
       --card-border: #334155;
@@ -40,8 +66,46 @@
       --shadow-card: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
       --shadow-button: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
 
+      --theme-toggle-bg: rgba(255, 255, 255, 0.07);
+      --theme-toggle-border: rgba(255, 255, 255, 0.12);
+      --theme-active-bg: #3b82f6;
+      --theme-active-text: #ffffff;
+
+      --kbd-bg: #334155;
+      --kbd-border: #475569;
+      --kbd-text: #f8fafc;
+
       --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
       --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Cascadia Code", "Liberation Mono", "Courier New", monospace;
+    }
+
+    [data-theme="light"] {
+      --bg-gradient: radial-gradient(circle at 50% 0%, #ffffff 0%, #f1f5f9 100%);
+      --bg-base: #f8fafc;
+      --card-bg: #ffffff;
+      --card-subtle: #f8fafc;
+      --card-border: #cbd5e1;
+      --card-border-focus: #2563eb;
+
+      --text-main: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --primary-active: #1e40af;
+
+      --shadow-card: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+      --shadow-button: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+
+      --theme-toggle-bg: #f1f5f9;
+      --theme-toggle-border: #cbd5e1;
+      --theme-active-bg: #2563eb;
+      --theme-active-text: #ffffff;
+
+      --kbd-bg: #e2e8f0;
+      --kbd-border: #cbd5e1;
+      --kbd-text: #0f172a;
     }
 
     body {
@@ -52,29 +116,30 @@
       justify-content: center;
       padding: 1.5rem 1rem;
       background: var(--bg-gradient);
+      background-color: var(--bg-base);
       font-family: var(--font-sans);
       color: var(--text-main);
       line-height: 1.5;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
+      transition: background-color 0.25s ease, color 0.25s ease;
     }
 
     /* Container Principal */
     .app-container {
       width: 100%;
-      max-width: 560px;
+      max-width: 580px;
       display: flex;
       flex-direction: column;
       gap: 1.25rem;
     }
 
-    /* Cabeçalho */
-    .header {
-      text-align: center;
+    /* Barra Superior: Versão e Seletor de Tema */
+    .top-bar {
       display: flex;
-      flex-direction: column;
+      justify-content: space-between;
       align-items: center;
-      gap: 0.5rem;
+      width: 100%;
     }
 
     .brand-badge {
@@ -92,9 +157,70 @@
       text-transform: uppercase;
     }
 
+    [data-theme="light"] .brand-badge {
+      background: rgba(37, 99, 235, 0.1);
+      border-color: rgba(37, 99, 235, 0.25);
+      color: #2563eb;
+    }
+
     .brand-badge svg {
       width: 14px;
       height: 14px;
+    }
+
+    /* Seletor de Tema (RF-11) */
+    .theme-selector {
+      display: inline-flex;
+      background: var(--theme-toggle-bg);
+      border: 1px solid var(--theme-toggle-border);
+      border-radius: 9999px;
+      padding: 2px;
+      gap: 2px;
+    }
+
+    .theme-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 9999px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      outline: none;
+    }
+
+    .theme-btn:hover {
+      color: var(--text-main);
+    }
+
+    .theme-btn.active {
+      background: var(--theme-active-bg);
+      color: var(--theme-active-text);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+
+    .theme-btn:focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
+    }
+
+    .theme-btn svg {
+      width: 16px;
+      height: 16px;
+      pointer-events: none;
+    }
+
+    /* Cabeçalho */
+    .header {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
     }
 
     .title {
@@ -107,7 +233,7 @@
     .subtitle {
       font-size: 0.875rem;
       color: var(--text-secondary);
-      max-width: 440px;
+      max-width: 460px;
     }
 
     /* Cards */
@@ -120,6 +246,7 @@
       display: flex;
       flex-direction: column;
       gap: 1.25rem;
+      transition: background-color 0.25s ease, border-color 0.25s ease;
     }
 
     /* Visor de Senha */
@@ -133,7 +260,7 @@
       padding: 0.75rem 1rem;
       min-height: 64px;
       position: relative;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.25s ease;
     }
 
     .visor-container:focus-within {
@@ -182,6 +309,10 @@
       color: var(--text-main);
     }
 
+    [data-theme="light"] .btn-icon:hover {
+      background: rgba(0, 0, 0, 0.05);
+    }
+
     .btn-icon:focus-visible {
       border-color: var(--primary);
       outline: 2px solid var(--primary);
@@ -203,6 +334,12 @@
       background: rgba(59, 130, 246, 0.15);
       color: #60a5fa;
       border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    [data-theme="light"] .btn-copy-highlight {
+      background: rgba(37, 99, 235, 0.1);
+      color: #2563eb;
+      border-color: rgba(37, 99, 235, 0.25);
     }
 
     .btn-copy-highlight:hover {
@@ -267,7 +404,7 @@
     .strength-meter-bg {
       width: 100%;
       height: 8px;
-      background: rgba(255, 255, 255, 0.08);
+      background: rgba(125, 125, 125, 0.15);
       border-radius: 9999px;
       overflow: hidden;
       position: relative;
@@ -329,7 +466,6 @@
       box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
     }
 
-    /* Remove spinners do Chrome/Safari/Edge */
     .length-input-number::-webkit-outer-spin-button,
     .length-input-number::-webkit-inner-spin-button {
       -webkit-appearance: none;
@@ -429,12 +565,11 @@
       border-radius: var(--radius-sm);
       cursor: pointer;
       user-select: none;
-      transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.1s ease;
+      transition: border-color 0.2s ease, background-color 0.2s ease;
     }
 
     .option-card:hover {
       border-color: rgba(59, 130, 246, 0.5);
-      background: rgba(15, 23, 42, 0.8);
     }
 
     .option-card:focus-within {
@@ -549,7 +684,7 @@
     }
 
     .btn-generate-main:focus-visible {
-      outline: 2px solid #ffffff;
+      outline: 2px solid var(--text-main);
       outline-offset: 2px;
     }
 
@@ -561,6 +696,209 @@
     .btn-generate-main svg {
       width: 20px;
       height: 20px;
+    }
+
+    /* Histórico Efêmero em Memória de Sessão (RF-12) */
+    .history-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-card);
+      transition: background-color 0.25s ease, border-color 0.25s ease;
+    }
+
+    .history-summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.25rem;
+      cursor: pointer;
+      user-select: none;
+      list-style: none;
+      font-size: 0.9375rem;
+      font-weight: 600;
+      color: var(--text-main);
+      outline: none;
+    }
+
+    .history-summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .history-summary:focus-visible {
+      background: var(--theme-toggle-bg);
+      outline: 2px solid var(--primary);
+      outline-offset: -2px;
+    }
+
+    .history-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .history-counter {
+      font-size: 0.75rem;
+      padding: 0.15rem 0.5rem;
+      background: var(--theme-toggle-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 9999px;
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+    }
+
+    .history-arrow {
+      width: 18px;
+      height: 18px;
+      color: var(--text-muted);
+      transition: transform 0.2s ease;
+    }
+
+    details[open] .history-arrow {
+      transform: rotate(180deg);
+    }
+
+    .history-content {
+      padding: 0 1.25rem 1.25rem 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      border-top: 1px solid var(--card-border);
+    }
+
+    .history-header-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 0.75rem;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .btn-clear-history {
+      background: transparent;
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      font-size: 0.75rem;
+      padding: 0.25rem 0.6rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      transition: all 0.2s ease;
+    }
+
+    .btn-clear-history:hover {
+      color: var(--strength-weak);
+      border-color: var(--strength-weak);
+      background: rgba(239, 68, 68, 0.1);
+    }
+
+    .btn-clear-history:focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
+    }
+
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      list-style: none;
+    }
+
+    .history-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      background: var(--card-subtle);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-sm);
+      padding: 0.5rem 0.75rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem;
+      transition: border-color 0.2s ease;
+    }
+
+    .history-item:hover {
+      border-color: rgba(59, 130, 246, 0.4);
+    }
+
+    .history-password-text {
+      flex: 1;
+      word-break: break-all;
+      overflow-wrap: anywhere;
+      user-select: all;
+    }
+
+    .btn-history-copy {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-sm);
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: all 0.15s ease;
+    }
+
+    .btn-history-copy:hover {
+      background: rgba(59, 130, 246, 0.15);
+      color: #60a5fa;
+    }
+
+    .btn-history-copy:focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: 1px;
+    }
+
+    .btn-history-copy svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .history-empty {
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+    }
+
+    /* Legenda de Atalhos de Teclado (RF-10) */
+    .shortcuts-legend {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 0.75rem 1.25rem;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      padding: 0.5rem 0;
+    }
+
+    .shortcut-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    kbd {
+      display: inline-block;
+      padding: 0.15rem 0.45rem;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--kbd-text);
+      background-color: var(--kbd-bg);
+      border: 1px solid var(--kbd-border);
+      border-radius: 4px;
+      box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
     }
 
     /* Rodapé & Selo de Segurança */
@@ -612,6 +950,11 @@
       pointer-events: none;
     }
 
+    [data-theme="light"] .toast {
+      background: #0f172a;
+      color: #ffffff;
+    }
+
     .toast.show {
       transform: translateX(-50%) translateY(0);
       opacity: 1;
@@ -638,16 +981,49 @@
 
   <main class="app-container">
     
-    <!-- Cabeçalho -->
-    <header class="header">
+    <!-- Barra Superior: Versão e Alternância de Temas (RF-11) -->
+    <div class="top-bar">
       <div class="brand-badge">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
         </svg>
-        <span>v0.1.0 • Standalone</span>
+        <span>v0.2.0 • PWA</span>
       </div>
+
+      <!-- Seletor de Tema (RF-11) -->
+      <div class="theme-selector" role="radiogroup" aria-label="Seletor de tema visual">
+        <button type="button" id="theme-btn-light" class="theme-btn" role="radio" aria-checked="false" aria-label="Tema Claro" title="Modo Claro">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+        </button>
+        <button type="button" id="theme-btn-dark" class="theme-btn" role="radio" aria-checked="false" aria-label="Tema Escuro" title="Modo Escuro">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
+        <button type="button" id="theme-btn-system" class="theme-btn" role="radio" aria-checked="true" aria-label="Tema do Sistema" title="Seguir o Sistema">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+            <line x1="8" y1="21" x2="16" y2="21"/>
+            <line x1="12" y1="17" x2="12" y2="21"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Cabeçalho -->
+    <header class="header">
       <h1 class="title">Gerador de Senhas Seguras</h1>
-      <p class="subtitle">Geração instantânea e confidencial no seu navegador via CSPRNG nativo. Sem tráfego de rede e sem armazenamento persistente.</p>
+      <p class="subtitle">Geração instantânea e confidencial no seu navegador via CSPRNG nativo. Instale como PWA para resiliência 100% offline.</p>
     </header>
 
     <!-- Card Principal -->
@@ -660,8 +1036,8 @@
         </div>
 
         <div class="visor-actions">
-          <!-- Alternar Visibilidade -->
-          <button type="button" id="btn-visibility" class="btn-icon" aria-label="Ocultar ou exibir senha" title="Alternar visibilidade">
+          <!-- Alternar Visibilidade (RF-09 / RF-10) -->
+          <button type="button" id="btn-visibility" class="btn-icon" aria-label="Ocultar ou exibir senha" title="Alternar visibilidade (Tecla V)">
             <svg id="icon-eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
               <circle cx="12" cy="12" r="3"/>
@@ -674,8 +1050,8 @@
             </svg>
           </button>
 
-          <!-- Regenerar Rápido -->
-          <button type="button" id="btn-regenerate-quick" class="btn-icon" aria-label="Gerar nova senha" title="Gerar nova senha">
+          <!-- Regenerar Rápido (RF-07 / RF-10) -->
+          <button type="button" id="btn-regenerate-quick" class="btn-icon" aria-label="Gerar nova senha" title="Gerar nova senha (Tecla Espaço)">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
               <path d="M3 3v5h5"/>
@@ -684,8 +1060,8 @@
             </svg>
           </button>
 
-          <!-- Copiar -->
-          <button type="button" id="btn-copy" class="btn-icon btn-copy-highlight" aria-label="Copiar senha em texto claro" title="Copiar para área de transferência">
+          <!-- Copiar (RF-06 / RF-10) -->
+          <button type="button" id="btn-copy" class="btn-icon btn-copy-highlight" aria-label="Copiar senha em texto claro" title="Copiar para área de transferência (Tecla C ou Ctrl+C)">
             <svg id="icon-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
               <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
@@ -697,7 +1073,7 @@
         </div>
       </div>
 
-      <!-- Indicador de Força & Entropia -->
+      <!-- Indicador de Força & Entropia (RF-08) -->
       <div class="strength-wrapper" aria-label="Indicador de robustez da senha">
         <div class="strength-header">
           <span class="strength-title">Força estimada</span>
@@ -711,7 +1087,7 @@
         </div>
       </div>
 
-      <!-- Configuração de Comprimento -->
+      <!-- Configuração de Comprimento (RF-01) -->
       <div class="length-section">
         <div class="length-header">
           <label for="length-slider" class="length-label">Comprimento da Senha</label>
@@ -726,7 +1102,7 @@
         </div>
       </div>
 
-      <!-- Conjuntos de Caracteres -->
+      <!-- Conjuntos de Caracteres (RF-02) -->
       <fieldset style="border: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.625rem;">
         <legend class="section-title">Conjuntos de Caracteres</legend>
         <div class="charsets-grid">
@@ -766,7 +1142,7 @@
         </div>
       </fieldset>
 
-      <!-- Filtro de Caracteres Ambíguos -->
+      <!-- Filtro de Caracteres Ambíguos (RF-03) -->
       <div class="filter-section">
         <label class="filter-card" for="cb-ambiguous">
           <input type="checkbox" id="cb-ambiguous">
@@ -777,7 +1153,7 @@
         </label>
       </div>
 
-      <!-- Botão Primário de Geração -->
+      <!-- Botão Primário de Geração (RF-07) -->
       <button type="button" id="btn-generate-main" class="btn-generate-main" aria-label="Gerar nova senha com os parâmetros selecionados">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
@@ -790,6 +1166,57 @@
 
     </section>
 
+    <!-- Histórico Efêmero em Memória de Sessão (RF-12) -->
+    <details class="history-card" id="history-details">
+      <summary class="history-summary" aria-label="Alternar painel de histórico da sessão">
+        <div class="history-title-wrap">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+          <span>Histórico da Sessão</span>
+          <span id="history-counter" class="history-counter">0/5</span>
+        </div>
+        <svg class="history-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </summary>
+      
+      <div class="history-content">
+        <div class="history-header-actions">
+          <span>Armazenado estritamente em memória RAM</span>
+          <button type="button" id="btn-clear-history" class="btn-clear-history" aria-label="Limpar histórico da sessão">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 6h18"/>
+              <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+              <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+            </svg>
+            <span>Limpar Histórico</span>
+          </button>
+        </div>
+
+        <ul id="history-list" class="history-list" aria-label="Lista de senhas recentes da sessão">
+          <li class="history-empty">Nenhuma senha anterior gerada nesta sessão.</li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- Legenda Acessível de Atalhos de Teclado (RF-10) -->
+    <section class="shortcuts-legend" aria-label="Atalhos de teclado para produtividade">
+      <div class="shortcut-pill">
+        <kbd>Espaço</kbd>
+        <span>Nova Senha</span>
+      </div>
+      <div class="shortcut-pill">
+        <kbd>C</kbd> ou <kbd>Ctrl+C</kbd>
+        <span>Copiar</span>
+      </div>
+      <div class="shortcut-pill">
+        <kbd>V</kbd>
+        <span>Ocultar/Exibir</span>
+      </div>
+    </section>
+
     <!-- Rodapé -->
     <footer class="footer">
       <div class="security-badge">
@@ -797,7 +1224,7 @@
           <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
           <polyline points="9 12 11 14 15 10"/>
         </svg>
-        <span>100% Client-Side • Criptografia Nativa CSPRNG • Zero Network</span>
+        <span>100% Client-Side • Criptografia Nativa CSPRNG • PWA Offline</span>
       </div>
       <p>Nenhuma credencial é transmitida ou salva em armazenamento persistente.</p>
     </footer>
@@ -857,11 +1284,23 @@
     const toastMessage = document.getElementById('toast-message');
     const toastIcon = document.getElementById('toast-icon');
 
+    const themeBtnLight = document.getElementById('theme-btn-light');
+    const themeBtnDark = document.getElementById('theme-btn-dark');
+    const themeBtnSystem = document.getElementById('theme-btn-system');
+    const metaThemeColor = document.getElementById('meta-theme-color');
+
+    const historyList = document.getElementById('history-list');
+    const historyCounter = document.getElementById('history-counter');
+    const btnClearHistory = document.getElementById('btn-clear-history');
+
     /* Estado da Aplicação */
     let currentPassword = '';
     let isMasked = false;
     let toastTimeout = null;
     let copyButtonTimeout = null;
+
+    /* Histórico Efêmero em Memória de Execução (RAM) (RF-12) */
+    const ephemeralHistory = [];
 
     /**
      * Sorteia um número inteiro no intervalo [0, maxExclusive - 1]
@@ -913,7 +1352,7 @@
 
     /**
      * Motor de Geração de Senhas Criptográficas.
-     * Atende aos requisitos RF-01, RF-02, RF-03, RF-04 e RF-05.
+     * Atende aos requisitos RF-01, RF-02, RF-03, RF-04, RF-05 e adiciona ao histórico efêmero (RF-12).
      */
     function generatePassword() {
       const length = parseInt(lengthNumber.value, 10) || 16;
@@ -978,7 +1417,14 @@
       // [RF-05] Embaralhamento uniforme Fisher-Yates via CSPRNG para evitar posições previsíveis
       secureShuffle(passwordChars);
 
-      currentPassword = passwordChars.join('');
+      const newPassword = passwordChars.join('');
+
+      // [RF-12] Se já havia uma senha gerada na sessão anterior, transfere-a para o histórico efêmero
+      if (currentPassword && currentPassword !== newPassword) {
+        addPasswordToHistory(currentPassword);
+      }
+
+      currentPassword = newPassword;
 
       // Atualiza interface
       renderPassword();
@@ -1125,7 +1571,7 @@
     }
 
     /**
-     * Ação de cópia acionada pelo usuário (RF-06).
+     * Ação de cópia da senha principal acionada pelo usuário (RF-06 / RF-10).
      * Copia sempre a senha em texto claro, mesmo que esteja mascarada na tela.
      */
     async function handleCopy() {
@@ -1177,7 +1623,6 @@
       const activeCheckboxes = getActiveCharsetCheckboxes();
 
       if (activeCheckboxes.length === 0) {
-        // Bloqueia desmarcação do último item ativo
         event.target.checked = true;
         showToast('Ao menos um conjunto deve permanecer ativo.', 'warning');
         return;
@@ -1192,6 +1637,208 @@
     function triggerRegenerateAnimation(button) {
       button.classList.add('rotating');
       setTimeout(() => button.classList.remove('rotating'), 400);
+    }
+
+    /* -------------------------------------------------------------
+     * [RF-12] Histórico Efêmero em Memória de Sessão (RAM)
+     * ------------------------------------------------------------- */
+
+    /**
+     * Adiciona uma credencial ao histórico efêmero da sessão (máx. 5).
+     */
+    function addPasswordToHistory(pwd) {
+      if (!pwd) return;
+      if (ephemeralHistory.length > 0 && ephemeralHistory[0] === pwd) return;
+
+      ephemeralHistory.unshift(pwd);
+      if (ephemeralHistory.length > 5) {
+        ephemeralHistory.pop();
+      }
+
+      renderHistory();
+    }
+
+    /**
+     * Renderiza os itens do histórico da sessão na interface.
+     */
+    function renderHistory() {
+      historyCounter.textContent = `${ephemeralHistory.length}/5`;
+
+      if (ephemeralHistory.length === 0) {
+        historyList.innerHTML = '<li class="history-empty">Nenhuma senha anterior gerada nesta sessão.</li>';
+        return;
+      }
+
+      historyList.innerHTML = '';
+
+      ephemeralHistory.forEach((pwd, idx) => {
+        const li = document.createElement('li');
+        li.className = 'history-item';
+
+        const displayedText = isMasked ? '•'.repeat(pwd.length) : pwd;
+
+        li.innerHTML = `
+          <span class="history-password-text" title="Senha #${idx + 1}">${escapeHtml(displayedText)}</span>
+          <button type="button" class="btn-history-copy" data-idx="${idx}" aria-label="Copiar senha do histórico #${idx + 1}" title="Copiar senha">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+              <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+            </svg>
+          </button>
+        `;
+
+        const copyBtn = li.querySelector('.btn-history-copy');
+        copyBtn.addEventListener('click', async () => {
+          const ok = await copyToClipboard(pwd);
+          if (ok) {
+            showToast('Senha do histórico copiada!', 'success');
+          } else {
+            showToast('Erro ao copiar senha.', 'warning');
+          }
+        });
+
+        historyList.appendChild(li);
+      });
+    }
+
+    /**
+     * Limpa o histórico efêmero em memória.
+     */
+    function clearHistory() {
+      ephemeralHistory.length = 0;
+      renderHistory();
+      showToast('Histórico da sessão limpo.', 'success');
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    /* -------------------------------------------------------------
+     * [RF-11] Alternância de Temas (Claro / Escuro / Sistema)
+     * ------------------------------------------------------------- */
+
+    /**
+     * Aplica o tema visual selecionado e sincroniza a interface.
+     */
+    function applyTheme(themeChoice) {
+      let resolved = themeChoice;
+      if (themeChoice === 'system') {
+        resolved = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+
+      document.documentElement.setAttribute('data-theme', resolved);
+
+      // Atualiza meta theme-color para navegadores móveis e PWA
+      if (metaThemeColor) {
+        metaThemeColor.setAttribute('content', resolved === 'dark' ? '#0f172a' : '#f8fafc');
+      }
+
+      // Atualiza botões
+      [themeBtnLight, themeBtnDark, themeBtnSystem].forEach(btn => {
+        btn.classList.remove('active');
+        btn.setAttribute('aria-checked', 'false');
+      });
+
+      if (themeChoice === 'light') {
+        themeBtnLight.classList.add('active');
+        themeBtnLight.setAttribute('aria-checked', 'true');
+      } else if (themeChoice === 'dark') {
+        themeBtnDark.classList.add('active');
+        themeBtnDark.setAttribute('aria-checked', 'true');
+      } else {
+        themeBtnSystem.classList.add('active');
+        themeBtnSystem.setAttribute('aria-checked', 'true');
+      }
+
+      // Persistência voluntária da preferência estética (não credencial)
+      try {
+        localStorage.setItem('pg_theme_preference', themeChoice);
+      } catch (e) {
+        // Ignora em caso de restrição de storage
+      }
+    }
+
+    // Inicialização do Tema
+    function initTheme() {
+      let saved = 'system';
+      try {
+        saved = localStorage.getItem('pg_theme_preference') || 'system';
+      } catch (e) {}
+
+      applyTheme(saved);
+
+      themeBtnLight.addEventListener('click', () => applyTheme('light'));
+      themeBtnDark.addEventListener('click', () => applyTheme('dark'));
+      themeBtnSystem.addEventListener('click', () => applyTheme('system'));
+
+      // Listener dinâmico para mudanças de tema no sistema operacional
+      if (window.matchMedia) {
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+          let currentPref = 'system';
+          try {
+            currentPref = localStorage.getItem('pg_theme_preference') || 'system';
+          } catch (e) {}
+          if (currentPref === 'system') {
+            applyTheme('system');
+          }
+        });
+      }
+    }
+
+    /* -------------------------------------------------------------
+     * [RF-10] Atalhos de Teclado Globais
+     * ------------------------------------------------------------- */
+    document.addEventListener('keydown', (e) => {
+      const activeEl = document.activeElement;
+      const isInput = activeEl && (
+        activeEl.tagName === 'INPUT' ||
+        activeEl.tagName === 'TEXTAREA' ||
+        activeEl.isContentEditable
+      );
+
+      // Não dispara atalhos globais se o usuário estiver digitando em campo de entrada
+      if (isInput) return;
+
+      // Tecla Espaço: Gera nova senha instantaneamente
+      if (e.code === 'Space') {
+        e.preventDefault();
+        triggerRegenerateAnimation(btnRegenerateQuick);
+        generatePassword();
+        return;
+      }
+
+      // Tecla C ou Ctrl+C: Copia senha atual
+      if (e.key === 'c' || e.key === 'C') {
+        const hasSelection = window.getSelection && window.getSelection().toString().length > 0;
+        if (e.ctrlKey && hasSelection) return; // Permite seleção manual se houver texto selecionado
+        e.preventDefault();
+        handleCopy();
+        return;
+      }
+
+      // Tecla V: Alterna visibilidade
+      if (e.key === 'v' || e.key === 'V') {
+        if (!e.ctrlKey && !e.altKey && !e.metaKey) {
+          e.preventDefault();
+          isMasked = !isMasked;
+          renderPassword();
+          renderHistory();
+        }
+      }
+    });
+
+    /* -------------------------------------------------------------
+     * [RT-04] Registro de Service Worker para PWA Offline
+     * ------------------------------------------------------------- */
+    if ('serviceWorker' in navigator && (window.location.protocol === 'http:' || window.location.protocol === 'https:')) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch((err) => {
+          console.warn('Registro do Service Worker ignorado ou com erro:', err);
+        });
+      });
     }
 
     /* Event Listeners */
@@ -1224,7 +1871,7 @@
       generatePassword();
     });
 
-    // Botões de Regeneração (RF-07)
+    // Botões de Regeneração
     btnRegenerateQuick.addEventListener('click', () => {
       triggerRegenerateAnimation(btnRegenerateQuick);
       generatePassword();
@@ -1234,18 +1881,24 @@
       generatePassword();
     });
 
-    // Botão de Cópia (RF-06)
+    // Botão de Cópia
     btnCopy.addEventListener('click', handleCopy);
 
-    // Botão de Alternância de Visibilidade (RF-09)
+    // Botão de Alternância de Visibilidade
     btnVisibility.addEventListener('click', () => {
       isMasked = !isMasked;
       renderPassword();
+      renderHistory();
     });
+
+    // Limpar Histórico
+    btnClearHistory.addEventListener('click', clearHistory);
 
     // Inicialização ao carregar a página
     window.addEventListener('DOMContentLoaded', () => {
+      initTheme();
       generatePassword();
+      renderHistory();
     });
   </script>
 </body>

@@ -83,28 +83,28 @@ Foco em capacidades de instalação offline como Web App nativo e recursos para 
 
 ### [RF-10] Atalhos de Teclado para Ações Frequentes
 - **Descrição:** Mapeamento de teclas de atalho globais para aumentar a velocidade operacional do usuário.
-- [ ] Pressionamento da tecla `Espaço` gera uma nova senha instantaneamente (quando o foco não estiver em inputs numéricos).
-- [ ] Tecla `C` ou combinação `Ctrl+C` aciona a cópia imediata da senha atual.
-- [ ] Tecla `V` alterna a visibilidade da senha (ocultar/mostrar).
-- [ ] Legenda visual acessível indicando os atalhos disponíveis.
+- [x] Pressionamento da tecla `Espaço` gera uma nova senha instantaneamente (quando o foco não estiver em inputs numéricos).
+- [x] Tecla `C` ou combinação `Ctrl+C` aciona a cópia imediata da senha atual.
+- [x] Tecla `V` alterna a visibilidade da senha (ocultar/mostrar).
+- [x] Legenda visual acessível indicando os atalhos disponíveis.
 
 ### [RF-11] Alternância de Temas (Claro / Escuro / Sistema)
 - **Descrição:** Personalização da aparência visual com persistência voluntária da preferência estética.
-- [ ] Seletor com 3 modos: Claro, Escuro e Automático (seguindo a preferência do sistema operacional via `prefers-color-scheme`).
-- [ ] Transição de tema instantânea sem efeito de piscar (*flash of unstyled content*).
+- [x] Seletor com 3 modos: Claro, Escuro e Automático (seguindo a preferência do sistema operacional via `prefers-color-scheme`).
+- [x] Transição de tema instantânea sem efeito de piscar (*flash of unstyled content*).
 
 ### [RF-12] Histórico Efêmero em Memória de Sessão
 - **Descrição:** Registro volátil das últimas senhas geradas durante a utilização ativa.
-- [ ] Painel recolhível exibindo até as últimas 5 senhas geradas durante a aba aberta.
-- [ ] Dados armazenados estritamente na memória de execução JavaScript (RAM), sem gravação em storage persistente.
-- [ ] Botão de "Limpar Histórico" para descarte imediato dos itens.
-- [ ] O encerramento ou recarregamento da aba destrói permanentemente o histórico.
+- [x] Painel recolhível exibindo até as últimas 5 senhas geradas durante a aba aberta.
+- [x] Dados armazenados estritamente na memória de execução JavaScript (RAM), sem gravação em storage persistente.
+- [x] Botão de "Limpar Histórico" para descarte imediato dos itens.
+- [x] O encerramento ou recarregamento da aba destrói permanentemente o histórico.
 
 ### [RT-04] Suporte a Progressive Web App (PWA)
 - **Descrição:** Transformação da solução em Web App instalável e com resiliência offline.
-- [ ] Arquivo `manifest.json` com metadados da aplicação, cores temáticas e ícones em múltiplas resoluções.
-- [ ] Service Worker configurado para cache offline imediato de todos os assets da aplicação.
-- [ ] Capacidade de instalação direta na tela de início do Android/iOS e como app no Desktop (Chrome/Edge).
+- [x] Arquivo `manifest.json` com metadados da aplicação, cores temáticas e ícones em múltiplas resoluções.
+- [x] Service Worker configurado para cache offline imediato de todos os assets da aplicação.
+- [x] Capacidade de instalação direta na tela de início do Android/iOS e como app no Desktop (Chrome/Edge).
 
 ---
 
