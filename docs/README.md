@@ -36,10 +36,7 @@ A solução foi projetada para ser autossuficiente em um único arquivo:
 ### Execução
 
 #### Opção 1: Abertura Direta (Mais simples)
-Dê um **duplo clique** no arquivo `index.html` ou abra-o diretamente no navegador:
-```text
-file:///c:/Users/leopoldo.fernandes/Projetos/PG/index.html
-```
+Dê um **duplo clique** no arquivo `index.html` ou abra-o diretamente no navegador.
 
 #### Opção 2: Servidor Estático Local (Opcional)
 Caso prefira servir via HTTP local, utilize qualquer utilitário de sua preferência:
