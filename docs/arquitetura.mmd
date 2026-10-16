@@ -1,0 +1,40 @@
+flowchart TD
+    %% Interface do Usuário
+    subgraph UI["Interface do Usuário (DOM / Single-File)"]
+        Controles["Controles de Entrada (Slider, Checkboxes)"]
+        Acoes["Botões de Ação (Gerar, Copiar, Visibilidade)"]
+        Exibicao["Painel de Exibição (Senha, Força, Entropia)"]
+    end
+
+    %% Lógica da Aplicação
+    subgraph App["Lógica da Aplicação (Vanilla JavaScript)"]
+        Controlador["Controlador de Estado e Eventos"]
+        Regras["Montador de Conjuntos e Validador de Regras"]
+        Gerador["Motor de Geração de Senhas"]
+        Entropia["Calculadora de Entropia e Força"]
+        Copiar["Serviço de Cópia"]
+    end
+
+    %% Primitivas Nativas do Navegador
+    subgraph Navegador["APIs Nativas do Navegador"]
+        CSPRNG["Web Cryptography API (crypto.getRandomValues)"]
+        Clipboard["Clipboard API (navigator.clipboard.writeText)"]
+    end
+
+    %% Fluxo de Geração
+    Controles -->|"Entrada de parâmetros"| Controlador
+    Acoes -->|"Disparo de ação"| Controlador
+    Controlador -->|"Parâmetros configurados"| Regras
+    Regras -->|"Charset e regras de inclusão"| Gerador
+    Gerador -->|"Requisição de valores aleatórios"| CSPRNG
+    CSPRNG -->|"Bytes aleatórios seguros"| Gerador
+    Gerador -->|"Senha gerada"| Controlador
+    Controlador -->|"Senha e parâmetros"| Entropia
+    Entropia -->|"Métricas de força e bits"| Controlador
+    Controlador -->|"Atualização visual"| Exibicao
+
+    %% Fluxo de Cópia
+    Acoes -->|"Comando de cópia"| Copiar
+    Copiar -->|"Gravação de texto"| Clipboard
+    Clipboard -->|"Confirmação de sucesso"| Copiar
+    Copiar -->|"Feedback visual temporário"| Exibicao
