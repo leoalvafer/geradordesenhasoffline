@@ -1,5 +1,5 @@
-/* Service Worker para PWA — PG Gerador de Senhas Seguras (Release v0.2.0) */
-const CACHE_NAME = 'pg-cache-v0.2.0';
+/* Service Worker para PWA — PG Gerador de Senhas Seguras (Release v0.3.0) */
+const CACHE_NAME = 'pg-cache-v0.3.0';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',

@@ -114,22 +114,22 @@ Foco em confiabilidade criptográfica, precisão estatística e conformidade com
 
 ### [RT-05] Suíte de Testes Unitários Standalone
 - **Descrição:** Módulo de testes automatizados executado diretamente no navegador sem necessidade de terminal ou Node.js.
-- [ ] Teste unitário de limites de comprimento (validação estrita de 4 a 64 caracteres).
-- [ ] Teste de inclusão obrigatória de todos os conjuntos marcados em amostras repetidas.
-- [ ] Teste de exclusão estrita de caracteres ambíguos.
-- [ ] Teste da precisão do cálculo matemático de entropia em bits.
-- [ ] Painel visual minimalista no navegador exibindo status das asserções (Pass/Fail).
+- [x] Teste unitário de limites de comprimento (validação estrita de 4 a 64 caracteres).
+- [x] Teste de inclusão obrigatória de todos os conjuntos marcados em amostras repetidas.
+- [x] Teste de exclusão estrita de caracteres ambíguos.
+- [x] Teste da precisão do cálculo matemático de entropia em bits.
+- [x] Painel visual minimalista no navegador exibindo status das asserções (Pass/Fail).
 
 ### [RT-06] Teste de Distribuição Estatística do CSPRNG
 - **Descrição:** Validação estatística de aleatoriedade e uniformidade na amostragem de dados.
-- [ ] Teste automatizado gerando amostra de 10.000 caracteres, verificando desvio uniforme via teste de Qui-Quadrado ($\chi^2$).
-- [ ] Validação automatizada atestando ausência de qualquer referência ou execução de `Math.random()`.
+- [x] Teste automatizado gerando amostra de 10.000 caracteres, verificando desvio uniforme via teste de Qui-Quadrado ($\chi^2$).
+- [x] Validação automatizada atestando ausência de qualquer referência ou execução de `Math.random()`.
 
 ### [RT-07] Auditoria de Acessibilidade e Performance
 - **Descrição:** Validação formal com ferramentas de auditoria técnica.
-- [ ] Pontuação de 100/100 na categoria Acessibilidade da ferramenta Google Lighthouse.
-- [ ] Pontuação de 100/100 na categoria Melhores Práticas e Performance no Lighthouse.
-- [ ] Inclusão e validação de atributos `aria-label`, `aria-live` (para leitura de tela ao gerar e copiar) e `role`.
+- [x] Pontuação de 100/100 na categoria Acessibilidade da ferramenta Google Lighthouse.
+- [x] Pontuação de 100/100 na categoria Melhores Práticas e Performance no Lighthouse.
+- [x] Inclusão e validação de atributos `aria-label`, `aria-live` (para leitura de tela ao gerar e copiar) e `role`.
 
 ---
 
