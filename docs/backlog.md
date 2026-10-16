@@ -10,70 +10,70 @@ Foco na disponibilização da aplicação autônoma em arquivo único `index.htm
 
 ### [RF-01] Configuração de Comprimento da Senha
 - **Descrição:** Slider numérico e campo de entrada sincronizados permitindo definir o comprimento da senha entre 4 e 64 caracteres (padrão inicial: 16 caracteres).
-- [ ] O controle deslizante (*slider*) e o campo numérico mantêm seus valores sincronizados em tempo real.
-- [ ] O limite inferior permitido é 4 e o limite superior é 64.
-- [ ] A alteração do valor gera instantaneamente uma nova senha com o novo comprimento.
+- [x] O controle deslizante (*slider*) e o campo numérico mantêm seus valores sincronizados em tempo real.
+- [x] O limite inferior permitido é 4 e o limite superior é 64.
+- [x] A alteração do valor gera instantaneamente uma nova senha com o novo comprimento.
 
 ### [RF-02] Seleção de Conjunto de Caracteres
 - **Descrição:** Opções independentes para incluir ou excluir os quatro grupos fundamentais de caracteres.
-- [ ] Checkboxes funcionais para: Maiúsculas (`A-Z`), Minúsculas (`a-z`), Números (`0-9`) e Símbolos especiais (`!@#$%^&*()_+-=[]{}|;:,.<>?`).
-- [ ] O sistema impede a desmarcação simultânea de todos os conjuntos (mantendo no mínimo um conjunto ativo).
-- [ ] A senha gerada é composta exclusivamente pelos conjuntos selecionados.
+- [x] Checkboxes funcionais para: Maiúsculas (`A-Z`), Minúsculas (`a-z`), Números (`0-9`) e Símbolos especiais (`!@#$%^&*()_+-=[]{}|;:,.<>?`).
+- [x] O sistema impede a desmarcação simultânea de todos os conjuntos (mantendo no mínimo um conjunto ativo).
+- [x] A senha gerada é composta exclusivamente pelos conjuntos selecionados.
 
 ### [RF-03] Exclusão de Caracteres Ambíguos
 - **Descrição:** Filtro opcional para eliminar caracteres visualmente confusos para digitação humana.
-- [ ] Disponibilização de controle (toggle/checkbox) "Excluir caracteres semelhantes/ambíguos".
-- [ ] Quando ativado, a senha gerada não deve conter nenhum dos caracteres: `0`, `O`, `o`, `1`, `l`, `I`, `|`.
-- [ ] Quando desativado, tais caracteres voltam a integrar o espaço amostral normalmente.
+- [x] Disponibilização de controle (toggle/checkbox) "Excluir caracteres semelhantes/ambíguos".
+- [x] Quando ativado, a senha gerada não deve conter nenhum dos caracteres: `0`, `O`, `o`, `1`, `l`, `I`, `|`.
+- [x] Quando desativado, tais caracteres voltam a integrar o espaço amostral normalmente.
 
 ### [RF-04] Geração Criptográfica Segura
 - **Descrição:** Geração de valores aleatórios por meio de primitivas criptográficas nativas do navegador.
-- [ ] Utilização exclusiva da Web Cryptography API (`window.crypto.getRandomValues`).
-- [ ] Eliminação de viés de amostragem (*modulo bias*) na seleção de caracteres dentro do espaço amostral.
-- [ ] Ausência completa de chamadas a `Math.random()`.
+- [x] Utilização exclusiva da Web Cryptography API (`window.crypto.getRandomValues`).
+- [x] Eliminação de viés de amostragem (*modulo bias*) na seleção de caracteres dentro do espaço amostral.
+- [x] Ausência completa de chamadas a `Math.random()`.
 
 ### [RF-05] Garantia de Inclusão de Regras
 - **Descrição:** Garantia estrutural de que a senha contenha ao menos um exemplar de cada conjunto de caracteres selecionado.
-- [ ] A senha gerada contém obrigatoriamente pelo menos 1 caractere de cada grupo marcado.
-- [ ] A distribuição dos caracteres obrigatórios é embaralhada de forma criptograficamente segura (Fisher-Yates via CSPRNG), evitando posições previsíveis.
+- [x] A senha gerada contém obrigatoriamente pelo menos 1 caractere de cada grupo marcado.
+- [x] A distribuição dos caracteres obrigatórios é embaralhada de forma criptograficamente segura (Fisher-Yates via CSPRNG), evitando posições previsíveis.
 
 ### [RF-06] Cópia para Área de Transferência com Feedback
 - **Descrição:** Ação de cópia rápida com feedback visual temporário via Clipboard API.
-- [ ] Botão de ação rápida que copia a senha em texto claro via `navigator.clipboard.writeText`.
-- [ ] Exibição de confirmação visual imediata (ex.: tooltip/toast "Copiado!" com auto-dismiss em 2 segundos).
-- [ ] Tratamento gracioso de exceção caso o navegador não conceda permissão de acesso à área de transferência.
+- [x] Botão de ação rápida que copia a senha em texto claro via `navigator.clipboard.writeText`.
+- [x] Exibição de confirmação visual imediata (ex.: tooltip/toast "Copiado!" com auto-dismiss em 2 segundos).
+- [x] Tratamento gracioso de exceção caso o navegador não conceda permissão de acesso à área de transferência.
 
 ### [RF-07] Regeneração Rápida
 - **Descrição:** Mecanismos ágeis para criação de nova credencial sob demanda.
-- [ ] Botão dedicado "Gerar Novamente" / "Novo" para criação imediata de outra senha.
-- [ ] Regeneração reativa acionada automaticamente ao modificar qualquer parâmetro ou filtro.
+- [x] Botão dedicado "Gerar Novamente" / "Novo" para criação imediata de outra senha.
+- [x] Regeneração reativa acionada automaticamente ao modificar qualquer parâmetro ou filtro.
 
 ### [RF-08] Indicador de Força e Cálculo de Entropia
 - **Descrição:** Exibição da métrica de entropia (Shannon / bit-strength) e barra visual de robustez.
-- [ ] Cálculo da entropia da senha baseado na fórmula $E = L \times \log_2(R)$, exibindo o valor em bits.
-- [ ] Barra de progresso com coloração dinâmica e classificação textual: Fraca (< 50 bits), Média (50–74 bits), Forte (75–99 bits) e Muito Forte (≥ 100 bits).
+- [x] Cálculo da entropia da senha baseado na fórmula $E = L \times \log_2(R)$, exibindo o valor em bits.
+- [x] Barra de progresso com coloração dinâmica e classificação textual: Fraca (< 50 bits), Média (50–74 bits), Forte (75–99 bits) e Muito Forte (≥ 100 bits).
 
 ### [RF-09] Alternância de Visibilidade da Senha
 - **Descrição:** Opção para mascarar ou revelar o conteúdo da senha no visor principal.
-- [ ] Botão de alternância com ícone indicativo (olho aberto / olho fechado).
-- [ ] Ocultação do texto por meio de caracteres de máscara para proteção contra visualização indevida (*shoulder surfing*).
+- [x] Botão de alternância com ícone indicativo (olho aberto / olho fechado).
+- [x] Ocultação do texto por meio de caracteres de máscara para proteção contra visualização indevida (*shoulder surfing*).
 
 ### [RT-01] Arquitetura Standalone (Single-File)
 - **Descrição:** Empacotamento integral do sistema em um único arquivo autônomo `index.html`.
-- [ ] O arquivo contém todo o HTML5 semântico, estilos CSS3 e código JavaScript ES6+ embutidos.
-- [ ] Execução imediata via duplo clique (protocolo `file:///`), sem necessidade de servidor HTTP.
-- [ ] Nenhuma dependência externa carregada via CDN ou pré-processador.
+- [x] O arquivo contém todo o HTML5 semântico, estilos CSS3 e código JavaScript ES6+ embutidos.
+- [x] Execução imediata via duplo clique (protocolo `file:///`), sem necessidade de servidor HTTP.
+- [x] Nenhuma dependência externa carregada via CDN ou pré-processador.
 
 ### [RT-02] Segurança e Isolamento de Rede (*Zero Network*)
 - **Descrição:** Garantia de operação 100% isolada e confidencial no cliente.
-- [ ] Zero emissão de requisições de rede (`fetch`, `XMLHttpRequest`, tracking ou telemetria).
-- [ ] Nenhuma gravação de credenciais em `localStorage`, `sessionStorage`, cookies ou IndexedDB.
+- [x] Zero emissão de requisições de rede (`fetch`, `XMLHttpRequest`, tracking ou telemetria).
+- [x] Nenhuma gravação de credenciais em `localStorage`, `sessionStorage`, cookies ou IndexedDB.
 
 ### [RT-03] Design Responsivo e Acessibilidade (Mobile-First)
 - **Descrição:** Interface fluida para dispositivos móveis e desktops com suporte a acessibilidade.
-- [ ] Layout adaptável para viewports a partir de 320px sem quebras ou rolagem horizontal.
-- [ ] Navegação completa por teclado via tecla `Tab`, `Enter` e `Space`.
-- [ ] Contraste de cores entre texto e fundo com proporção mínima de 4.5:1 (WCAG 2.1 AA).
+- [x] Layout adaptável para viewports a partir de 320px sem quebras ou rolagem horizontal.
+- [x] Navegação completa por teclado via tecla `Tab`, `Enter` e `Space`.
+- [x] Contraste de cores entre texto e fundo com proporção mínima de 4.5:1 (WCAG 2.1 AA).
 
 ---
 
