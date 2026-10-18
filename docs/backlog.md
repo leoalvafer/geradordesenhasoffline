@@ -160,3 +160,41 @@ Foco em consolidação para produção, novos modos de geração amigáveis e ho
 - **Descrição:** Entrega da versão final homologada para o usuário final.
 - [x] Documentação de usuário final e manual de atalhos incorporados.
 - [x] Criação de tag Git formal `v1.0.0` com notas de lançamento consolidadas no repositório.
+
+---
+
+## 📦 Release v1.1.0 — Segurança e Diceware 7.776
+
+Foco em reforço da segurança criptográfica, mitigação de vazamento de credenciais e refinamento de acessibilidade e usabilidade.
+
+### [RF-15] Expansão do Dicionário Diceware para 7.776 Palavras
+- **Descrição:** Atualização da base de frases-passe com dicionário completo em português de 7.776 palavras ($6^5$ combinações, $\approx 12.92\text{ bits/palavra}$).
+- [x] Substituição da lista anterior de 512 palavras pela lista integral com 7.776 palavras.
+- [x] Atualização da fórmula de cálculo de entropia dinâmica baseada na nova dimensão amostral.
+- [x] Validação automatizada na suíte de testes unitários (`DICEWARE_DICTIONARY.length === 7776`).
+
+### [RF-16] Imposição de Content Security Policy (Zero Network Blindado)
+- **Descrição:** Política estrita no nível do navegador bloqueando qualquer requisição externa.
+- [x] Tag `<meta http-equiv="Content-Security-Policy">` com `connect-src 'none'`.
+- [x] Inclusão de `<meta name="referrer" content="no-referrer">`.
+
+### [RF-17] Limpeza Automática da Área de Transferência (Auto-Clear Clipboard)
+- **Descrição:** Descarte automático de credenciais copiadas para mitigar persistência no clipboard do SO.
+- [x] Temporizador automático de 60 segundos limpando a área de transferência com notificação visual.
+- [x] Prevenção de acúmulo de senhas em históricos de área de transferência.
+
+### [RF-18] Correção de Histórico Efêmero ao Arrastar Sliders
+- **Descrição:** Prevenção de perda de credenciais ao alterar comprimento ou número de palavras.
+- [x] O evento `input` atualiza a pré-visualização em tempo real sem poluir o histórico.
+- [x] Apenas o evento `change` (soltura do slider) ou ação explícita registra no histórico.
+
+### [RF-19] Restauração de Credenciais do Histórico no Visor
+- **Descrição:** Possibilidade de recarregar senhas anteriores de volta ao painel principal.
+- [x] Clique sobre o texto da senha no histórico ou no botão de restauração carrega a credencial no visor.
+- [x] Recalculo dinâmico automático de entropia e indicador de força da senha restaurada.
+
+### [RT-10] Acessibilidade por Teclado WCAG em Controles e Modais
+- **Descrição:** Garantia de que a tecla Espaço não intercepte a ativação de botões ou modais.
+- [x] A tecla `Espaço` não intercepta o foco em botões, links, abas ou sumários.
+- [x] Atalhos globais são desativados de fundo quando caixas de diálogo modais estão abertas.
+
